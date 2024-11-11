@@ -1,0 +1,17 @@
+# Bỏ qua file object (.o)
+*.o
+
+# Bỏ qua file thực thi
+a.out
+*.exe
+
+# Bỏ qua các file lưu trữ tạm thời
+*.dat
+
+# Bỏ qua thư mục build
+/build/
+
+# Bỏ qua các file tạm thời của hệ thống
+*.swp
+*~
+.DS_Store
