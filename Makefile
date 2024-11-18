@@ -14,6 +14,7 @@ APP_EXEC = app
 # Các tệp nguồn cho app
 APP_SRC = $(SRC_DIR)/client.c $(VIEWS_DIR)/Auth/auth_view.c $(UTILS_DIR)/style_manager.c
 
+<<<<<<< HEAD
 # Các tệp .o tương ứng
 APP_OBJ = $(APP_SRC:.c=.o)
 
