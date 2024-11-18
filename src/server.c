@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
-#include "user.h"
+#include "models/User/user.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 100
