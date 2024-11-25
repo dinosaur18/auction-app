@@ -39,6 +39,7 @@ button:focus {
 }
 
 .custom_form {
+    /* width: 1280px; */
     padding: 60px 120px;
     background-color: #013243;
     border-radius: 10px;
@@ -67,4 +68,19 @@ button:focus {
     border: none;
     outline: none;
     color: #fff;
+}
+
+.custom_switcher > button {
+    background-color: transparent;
+    color: #fff;
+    margin: 2px;
+    padding: 8px 10px;
+    border-radius: 0;
+}
+
+.custom_switcher > button:checked {
+    /* background-color: #02E079; */
+    color: #fff;
+    font-weight: bold;
+    border-bottom: 3px solid #02E079;
 }

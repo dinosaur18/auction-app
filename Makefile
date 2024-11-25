@@ -1,36 +1,44 @@
 # Compiler và cờ biên dịch
 CC = gcc
-CFLAGS = -Wall 
-GTK_FLAGS = $(shell pkg-config --cflags --libs gtk+-3.0)
+CFLAGS = -Wall -rdynamic
+GTK_FLAGS = `pkg-config --cflags --libs gtk+-3.0`
 
-# Thư mục chứa mã nguồn
-SRC_DIR = src
-VIEWS_DIR = $(SRC_DIR)/views
-UTILS_DIR = $(SRC_DIR)/utils
+# Thư mục chính
+CLIENT_DIR = client/src
+AUTH_DIR = $(CLIENT_DIR)/views/Auth
+UTILS_DIR = $(CLIENT_DIR)/utils
+SERVICES_DIR = $(CLIENT_DIR)/services
 
-# Tên file thực thi
-APP_EXEC = app
+SERVER_DIR = server/src
+USER_DIR = $(SERVER_DIR)/user
+INCLUDE_DIR = include
 
-# Các tệp nguồn cho app
-APP_SRC = $(SRC_DIR)/client.c $(VIEWS_DIR)/Auth/auth_view.c $(UTILS_DIR)/style_manager.c
+# Tệp nguồn và đầu ra
+CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
+					$(AUTH_DIR)/auth_view.c \
+					$(UTILS_DIR)/style_manager.c \
+					$(SERVICES_DIR)/auth_service.c \
+					$(USER_DIR)/models/user.c \
 
-# Các tệp .o tương ứng
-APP_OBJ = $(APP_SRC:.c=.o)
+SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
+					$(USER_DIR)/models/user.c \
 
-# Đường dẫn tới file header
-INCLUDES = -I$(VIEWS_DIR)/Auth -I$(UTILS_DIR)
+CLIENT = client_exec
+SERVER = server_exec
 
-# Mục tiêu mặc định
-all: $(APP_EXEC)
+INCLUDES = 	-I$(AUTH_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
+			-I$(USER_DIR)/models \
+			-I$(INCLUDE_DIR)
 
-# Luật biên dịch app với GTK+
-$(APP_EXEC): $(APP_OBJ)
-	$(CC) $(CFLAGS) $(INCLUDES) -o $@ $^ $(GTK_FLAGS)
+# Quy tắc biên dịch
+all: $(CLIENT) $(SERVER)
 
-# Quy tắc biên dịch các file .c thành .o (Thêm $(GTK_FLAGS) để tìm thấy gtk/gtk.h)
-%.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(GTK_FLAGS) -c $< -o $@
+$(CLIENT): $(CLIENT_SOURCES) 
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(CLIENT) $(CLIENT_SOURCES) $(GTK_FLAGS)
 
-# Dọn dẹp các file object và file thực thi
+$(SERVER): $(SERVER_SOURCES) 
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(SERVER) $(SERVER_SOURCES) $(GTK_FLAGS)
+
+# Quy tắc dọn dẹp
 clean:
-	rm -f $(APP_OBJ) $(APP_EXEC)
+	rm -f $(CLIENT) $(SERVER)

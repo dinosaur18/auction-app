@@ -6,7 +6,7 @@ void apply_css() {
     GdkScreen *screen = gdk_display_get_default_screen(display);
 
     // Tải CSS từ file
-    if (!gtk_css_provider_load_from_path(provider, "assets/style.css", NULL)) {
+    if (!gtk_css_provider_load_from_path(provider, "client/src/assets/style.css", NULL)) {
         g_warning("Không thể tải file CSS: assets/style.css");
     }
     

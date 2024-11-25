@@ -1,5 +1,5 @@
-#ifndef USER_H
-#define USER_H
+#ifndef USER_MODEL_H
+#define USER_MODEL_H
 
 #define MAX_LENGTH 50
 
@@ -13,4 +13,4 @@ int saveUser(User user);
 int checkUserExists(const char *username);
 int authenticateUser(User user);
 
-#endif // USER_H
+#endif 
