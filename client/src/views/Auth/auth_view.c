@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include "style_manager.h"
 #include "auth_view.h"
+#include "auth_service.h"
 
 typedef struct
 {
@@ -15,32 +16,29 @@ void on_main_window_destroy()
     gtk_main_quit();
 }
 
-void on_register_button_clicked() {
-    printf("Clicked\n");
-};
-void on_login_button_clicked(LoginContext *context)
+void on_register_button_clicked(GtkWidget *button, gpointer user_data)
 {
-    
+    printf("Register button clicked\n");
+}
+
+void on_login_button_clicked(GtkWidget *button, gpointer user_data)
+{
+    LoginContext *context = (LoginContext *)user_data;
 
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->entry_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->entry_password));
 
-    printf("%s-%s\n", username, password);
+    printf("Username: %s, Password: %s\n", username, password);
 
-    // Gọi controller để xử lý đăng nhập
-    // int result = handle_login(sockfd, username, password);
-    // if (result == 1)
-    // {
-    //     printf("Login successful!");
-    //     // load_home_page();
-    // }
-    // else
-    // {
-    //     print("Invalid credentials!");
-    // }
+    int result = handle_login(context->sockfd, username, password);
+    if(result) {
+        printf("Đăng nhập thành công\n");
+    }
+    else printf("Đăng nhập thất bại\n");
 }
 
-void init_auth_view(int sockfd) {
+void init_auth_view(int sockfd)
+{
     GtkBuilder *builder;
     GtkWidget *window;
     GError *error = NULL;
@@ -48,7 +46,8 @@ void init_auth_view(int sockfd) {
     gtk_init(NULL, NULL);
 
     builder = gtk_builder_new();
-    if (!gtk_builder_add_from_file(builder, "client/src/views/Auth/auth_view.glade", &error)) {
+    if (!gtk_builder_add_from_file(builder, "client/src/views/Auth/auth_view.glade", &error))
+    {
         g_printerr("Error loading file: %s\n", error->message);
         g_clear_error(&error);
         return;

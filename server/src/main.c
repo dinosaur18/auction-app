@@ -4,14 +4,12 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
-#include "user.h"
+#include "server_controller.h"
+#include "message_type.h"
 
 #define PORT 8080
 #define BUFFER_SIZE 100
 #define MAX_USERS 100
-
-void handle_register(int client_socket);
-void handle_login(int client_socket);
 
 int main()
 {
@@ -117,113 +115,23 @@ int main()
                 }
             }
 
-            read(new_sock, buffer, sizeof(buffer));
-            int choice = atoi(buffer);
-            printf("%d\n", choice);
-
-            switch (choice)
+            recv(new_sock, buffer, BUFFER_SIZE, 0);
+            switch (buffer[0])
                 {
-                case 1:
+                case LOGIN:
                     handle_register(new_sock);
                     break;
-                case 2:
+                case REGISTER:
                     handle_login(new_sock);
                     break;
                 default:
                     printf("Lựa chọn không hợp lệ.\n");
                 }
-            
         }
-
-        // for (int i = 0; i < MAX_USERS; i++)
-        // {
-        //     fd = client_socks[i];
-
-        //     // Check for data from the client socket
-        //     if (FD_ISSET(fd, &read_fds))
-        //     {
-        //         int bytes_received = recv(fd, buffer, sizeof(buffer) - 1, 0);
-        //         if (bytes_received <= 0)
-        //         {
-        //             // Client disconnected or error
-        //             getpeername(fd, (struct sockaddr *)&client_addr, &addrlen);
-        //             printf("Client disconnected: ip %s, port %d\n", inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-        //             perror("recv");
-
-        //             // Đóng socket và xóa khỏi mảng client_socks
-        //             close(fd);
-        //             client_socks[i] = 0;
-        //             break;
-        //         }
-        //         else
-        //         {
-        //             buffer[bytes_received] = '\0'; // Null-terminate the received data
-        //             printf("Received from client: %s", buffer);
-
-        //             // Gửi tin nhắn đến tất cả các client khác
-        //             for (int j = 0; j < MAX_USERS; j++)
-        //             {
-        //                 if (client_socks[j] != 0 && client_socks[j] != fd) // Không gửi lại cho chính client đã gửi
-        //                 {
-        //                     send(client_socks[j], buffer, bytes_received, 0);
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
     }
     // Clean up
     close(sockfd);
     return 0;
 }
 
-void handle_register(int client_socket)
-{
-    User user;
 
-    // Nhận dữ liệu từ client
-    read(client_socket, &user, sizeof(User));
-    printf("Nhận thông tin đăng ký từ client: %s\n", user.username);
-
-    // Lưu thông tin người dùng
-    int result = saveUser(user);
-
-    if (result == 1)
-    {
-        char *success = "Đăng ký thành công!";
-        send(client_socket, success, strlen(success), 0);
-    }
-    else if (result == 0)
-    {
-        char *exists = "Người dùng đã tồn tại!";
-        send(client_socket, exists, strlen(exists), 0);
-    }
-    else
-    {
-        char *error = "Lỗi lưu thông tin!";
-        send(client_socket, error, strlen(error), 0);
-    }
-}
-
-void handle_login(int client_socket)
-{
-    User user;
-
-    // Nhận dữ liệu từ client
-    read(client_socket, &user, sizeof(User));
-    printf("Nhận thông tin đăng ký từ client: %s\n", user.username);
-
-    // Lưu thông tin người dùng
-    int result = authenticateUser(user);
-
-    if (result)
-    {
-        char *success = "Đăng nhập thành công!";
-        send(client_socket, success, strlen(success), 0);
-    }
-    else
-    {
-        char *error = "Sai thông tin đăng nhập!";
-        send(client_socket, error, strlen(error), 0);
-    }
-}

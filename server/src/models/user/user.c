@@ -7,7 +7,7 @@ int saveUser(User user) {
         return 0; // Username đã tồn tại
     }
 
-    FILE *file = fopen("users.dat", "ab");
+    FILE *file = fopen("data/users.dat", "ab");
     if (file == NULL) {
         return -1; 
     }
@@ -18,7 +18,7 @@ int saveUser(User user) {
 }
 
 int checkUserExists(const char *username) {
-    FILE *file = fopen("users.dat", "rb");
+    FILE *file = fopen("data/users.dat", "rb");
     if (file == NULL) {
         return 0;
     }
@@ -35,7 +35,7 @@ int checkUserExists(const char *username) {
 }
 
 int authenticateUser(User user) {
-    FILE *file = fopen("users.dat", "rb");
+    FILE *file = fopen("data/users.dat", "rb");
     if (file == NULL) {
         return -1;
     }

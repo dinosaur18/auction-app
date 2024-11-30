@@ -8,7 +8,7 @@
 
 #define BUFFER_SIZE 1024
 
-bool handle_login(int sockfd, const char *username, const char *password) {
+int handle_login(int sockfd, const char *username, const char *password) {
 
     char buffer[BUFFER_SIZE];    
     User user;
@@ -16,26 +16,26 @@ bool handle_login(int sockfd, const char *username, const char *password) {
     strncpy(user.password, password, sizeof(user.password));
     
     buffer[0] = LOGIN; 
-    // buffer[1] = user;
+    memcpy(&buffer[1], &user, sizeof(user));
 
     // Gửi dữ liệu qua socket
     if (send(sockfd, buffer, strlen(buffer), 0) < 0)
     {
         perror("send failed");
-        return false;
+        return 0;
     }
 
     // Đọc phản hồi từ server
     memset(buffer, 0, BUFFER_SIZE);
     
     recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (buffer[0] == LOGIN && buffer[1] == 1) return true;
-    else return false;
+    if (buffer[0] == LOGIN && buffer[1] == 1) return 1;
+    else return 0;
 
-    return false;
+    return 0;
 }
 
-bool handle_register(const char *username, const char *password, const char *email, int socket_fd) {
+int handle_register(const char *username, const char *password, const char *email, int socket_fd) {
 
-    return true;
+    return 0;
 }

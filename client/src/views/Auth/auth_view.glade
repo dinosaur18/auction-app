@@ -267,11 +267,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="login_button2">
+              <object class="GtkButton" id="login_button">
                 <property name="label" translatable="yes">Login</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_login_button_clicked" swapped="no"/>
                 <style>
                   <class name="custom_button"/>
                 </style>

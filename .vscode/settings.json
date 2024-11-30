@@ -2,6 +2,7 @@
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "style_manager.h": "c",
-        "user_controller.h": "c"
+        "user_controller.h": "c",
+        "socket.h": "c"
     }
 }

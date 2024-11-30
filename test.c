@@ -13,7 +13,7 @@ typedef struct {
 
 // Hàm đăng ký người dùng
 void registerUser() {
-    FILE *file = fopen("users.dat", "ab");
+    FILE *file = fopen("data/users.dat", "ab");
     if (file == NULL) {
         printf("Không thể mở file.\n");
         return;
@@ -34,7 +34,7 @@ void registerUser() {
 
 // Hàm hiển thị tất cả người dùng
 void displayUsers() {
-    FILE *file = fopen("users.dat", "rb");
+    FILE *file = fopen("data/users.dat", "rb");
     if (file == NULL) {
         printf("Không có thông tin người dùng.\n");
         return;
@@ -53,7 +53,7 @@ void displayUsers() {
 
 // Hàm đăng nhập người dùng
 void loginUser() {
-    FILE *file = fopen("users.dat", "rb");
+    FILE *file = fopen("data/users.dat", "rb");
     if (file == NULL) {
         printf("Không có thông tin người dùng.\n");
         return;

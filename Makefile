@@ -10,7 +10,9 @@ UTILS_DIR = $(CLIENT_DIR)/utils
 SERVICES_DIR = $(CLIENT_DIR)/services
 
 SERVER_DIR = server/src
-USER_DIR = $(SERVER_DIR)/user
+MODELS_DIR = $(SERVER_DIR)/models
+CONTROLLERS_DIR = $(SERVER_DIR)/controllers
+
 INCLUDE_DIR = include
 
 # Tệp nguồn và đầu ra
@@ -18,16 +20,17 @@ CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
 					$(AUTH_DIR)/auth_view.c \
 					$(UTILS_DIR)/style_manager.c \
 					$(SERVICES_DIR)/auth_service.c \
-					$(USER_DIR)/models/user.c \
+					$(MODELS_DIR)/user/user.c \
 
 SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
-					$(USER_DIR)/models/user.c \
+					$(CONTROLLERS_DIR)/server_controller.c \
+					$(MODELS_DIR)/user/user.c \
 
 CLIENT = client_exec
 SERVER = server_exec
 
 INCLUDES = 	-I$(AUTH_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
-			-I$(USER_DIR)/models \
+			-I$(MODELS_DIR)/user -I$(CONTROLLERS_DIR) \
 			-I$(INCLUDE_DIR)
 
 # Quy tắc biên dịch
