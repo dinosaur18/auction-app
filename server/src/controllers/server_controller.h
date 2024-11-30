@@ -5,9 +5,9 @@
 
 int handle_login(int client_socket, char buffer[BUFFER_SIZE]);
 int handle_register(int client_socket, char buffer[BUFFER_SIZE]);
-// int handle_createRoom(int client_socket);
-// int handle_deleteRoom(int client_socket);
-// int handle_createItem(int client_socket);
-// int handle_deleteItem(int client_socket);
+void handleCreateRoom(const char *roomName);
+// void handleListRooms();
+void handleDeleteRoom(int roomId);
+
 
 #endif 

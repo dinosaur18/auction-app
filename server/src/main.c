@@ -124,11 +124,29 @@ int main()
                 case REGISTER:
                     handle_login(new_sock, buffer);
                     break;
+                case CREATE_ROOM: {
+                    // Assuming buffer contains room name starting from index 1
+                    handleCreateRoom(new_sock, buffer + 1);
+                    break;
+                }
+                case DELETE_ROOM: {
+                    // Assuming buffer contains room ID (an integer) starting from index 1
+                    int roomId = atoi(buffer + 1);
+                    handleDeleteRoom(new_sock, roomId);  // Use correct handler for delete room
+                    break;
+                }
+            // case LIST_ROOMS: {
+            //     handleListRooms(new_sock);
+            //     break;
+            // }
                 default:
                     printf("Lựa chọn không hợp lệ.\n");
+
                 }
         }
     }
+     
+    
     // Clean up
     close(sockfd);
     return 0;

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "user.h"
 #include "message_type.h"
+#include "room.h"
 
 #define BUFFER_SIZE 100
 
@@ -54,3 +55,40 @@ int handle_register(int client_socket, char buffer[BUFFER_SIZE])
     }
     return 0;
 }
+
+void handleCreateRoom(const char *roomName) {
+    if (createRoom(roomName) > 0) {
+        printf("Phòng '%s' đã được tạo thành công!\n", roomName);
+    } else {
+        printf("Lỗi khi tạo phòng '%s'.\n", roomName);
+    }
+}
+
+// // Hàm liệt kê các phòng đã tồn tại
+// void handleListRooms() {
+//     Room rooms[100];
+//     int numRooms = 0;
+
+//     if (loadRooms(rooms, &numRooms)) {
+//         if (numRooms == 0) {
+//             printf("Không có phòng đấu giá nào.\n");
+//         } else {
+//             printf("Danh sách các phòng đấu giá:\n");
+//             for (int i = 0; i < numRooms; i++) {
+//                 printf("ID: %d, Tên: %s\n", rooms[i].roomId, rooms[i].roomName);
+//             }
+//         }
+//     } else {
+//         printf("Không thể tải phòng đấu giá.\n");
+//     }
+// }
+
+// Hàm xóa phòng đấu giá
+void handleDeleteRoom(int roomId) {
+    if (deleteRoom(roomId)) {
+        printf("Phòng đấu giá với ID %d đã được xóa thành công!\n", roomId);
+    } else {
+        printf("Không thể xóa phòng với ID %d.\n", roomId);
+    }
+}
+
