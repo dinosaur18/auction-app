@@ -136,10 +136,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="register_error_msg">
+              <object class="GtkLabel" id="register_msg">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="margin-bottom">10</property>
+                <style>
+                  <class name="text_color_white"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -284,10 +287,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="login_error_msg">
+              <object class="GtkLabel" id="login_msg">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="margin-bottom">10</property>
+                <style>
+                  <class name="text_color_white"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>

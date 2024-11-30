@@ -46,6 +46,7 @@ void displayUsers() {
     
     while (fread(&user, sizeof(User), 1, file)) {
         printf("Tên người dùng: %s\n", user.username);
+        printf("Password: %s\n", user.password);
         printf("-----------------------------\n");
     }
     fclose(file);

@@ -122,7 +122,7 @@ int main()
                     handle_login(new_sock, buffer);
                     break;
                 case REGISTER:
-                    handle_login(new_sock, buffer);
+                    handle_register(new_sock, buffer);
                     break;
                 default:
                     printf("Lựa chọn không hợp lệ.\n");
