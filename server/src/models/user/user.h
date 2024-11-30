@@ -1,5 +1,5 @@
-#ifndef USER_MODEL_H
-#define USER_MODEL_H
+#ifndef USER_H
+#define USER_H
 
 #define MAX_LENGTH 50
 

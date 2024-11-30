@@ -6,58 +6,51 @@
 
 #define BUFFER_SIZE 100
 
-int handle_client(int client_socket)
+int handle_login(int client_socket, char buffer[BUFFER_SIZE])
 {
+    User user;
+    memcpy(&user, &buffer[1], sizeof(user)); // Deserialize dữ liệu từ buffer
 
-    char buffer[BUFFER_SIZE];
-    recv(client_socket, buffer, BUFFER_SIZE, 0);
+    printf("Nhận thông tin đăng nhập từ client: %s\n", user.username);
 
-    switch (buffer[0])
+    // Lưu thông tin người dùng
+    int result = authenticateUser(user);
+
+    if (result)
     {
-    case LOGIN:
-        User user;
-        memcpy(&user, &buffer[1], sizeof(user)); // Deserialize dữ liệu từ buffer
-
-        printf("Nhận thông tin đăng nhập từ client: %s\n", user.username);
-
-        // Lưu thông tin người dùng
-        int result = authenticateUser(user);
-
-        if (result)
-        {
-            char *success = "Đăng nhập thành công!";
-            send(client_socket, success, strlen(success), 0);
-        }
-        else
-        {
-            char *error = "Sai thông tin đăng nhập!";
-            send(client_socket, error, strlen(error), 0);
-        }
-        break;
-    case REGISTER:
-        User user;
-        memcpy(&user, &buffer[1], sizeof(user)); // Deserialize dữ liệu từ buffer
-
-        printf("Nhận thông tin đăng ký từ client: %s\n", user.username);
-        int result = saveUser(user);
-
-        if (result == 1)
-        {
-            char *success = "Đăng ký thành công!";
-            send(client_socket, success, strlen(success), 0);
-        }
-        else if (result == 0)
-        {
-            char *exists = "Người dùng đã tồn tại!";
-            send(client_socket, exists, strlen(exists), 0);
-        }
-        else
-        {
-            char *error = "Lỗi lưu thông tin!";
-            send(client_socket, error, strlen(error), 0);
-        }
-        break;
-    default:
-        break;
+        char *success = "Đăng nhập thành công!";
+        send(client_socket, success, strlen(success), 0);
     }
+    else
+    {
+        char *error = "Sai thông tin đăng nhập!";
+        send(client_socket, error, strlen(error), 0);
+    }
+    return 0;
+}
+
+int handle_register(int client_socket, char buffer[BUFFER_SIZE])
+{
+    User user;
+    memcpy(&user, &buffer[1], sizeof(user)); // Deserialize dữ liệu từ buffer
+
+    printf("Nhận thông tin đăng ký từ client: %s\n", user.username);
+    int result = saveUser(user);
+
+    if (result == 1)
+    {
+        char *success = "Đăng ký thành công!";
+        send(client_socket, success, strlen(success), 0);
+    }
+    else if (result == 0)
+    {
+        char *exists = "Người dùng đã tồn tại!";
+        send(client_socket, exists, strlen(exists), 0);
+    }
+    else
+    {
+        char *error = "Lỗi lưu thông tin!";
+        send(client_socket, error, strlen(error), 0);
+    }
+    return 0;
 }

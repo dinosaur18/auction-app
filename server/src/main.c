@@ -119,10 +119,10 @@ int main()
             switch (buffer[0])
                 {
                 case LOGIN:
-                    handle_register(new_sock);
+                    handle_login(new_sock, buffer);
                     break;
                 case REGISTER:
-                    handle_login(new_sock);
+                    handle_login(new_sock, buffer);
                     break;
                 default:
                     printf("Lựa chọn không hợp lệ.\n");
