@@ -135,10 +135,25 @@ int main()
                     handleDeleteRoom(new_sock, roomId);  // Use correct handler for delete room
                     break;
                 }
-            // case LIST_ROOMS: {
-            //     handleListRooms(new_sock);
-            //     break;
-            // }
+                // case LIST_ROOMS: {
+                //     handleListRooms(new_sock);
+                //     break;
+                // }
+                case CREATE_ITEM: {
+                    handleCreateItem(new_sock, buffer + 1);
+                    break;
+                }
+                // case LIST_ITEMS: {
+                //     int roomId = atoi(buffer + 1);
+                //     handleListItems(new_sock, roomId);
+                //     break;
+                // }
+                case DELETE_ITEM: {
+                    int itemId = atoi(buffer + 1);
+                    handleDeleteItem(new_sock, itemId);
+                    break;
+                }
+
                 default:
                     printf("Lựa chọn không hợp lệ.\n");
 

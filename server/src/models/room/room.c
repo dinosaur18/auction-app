@@ -73,6 +73,7 @@ int loadRooms(Room *rooms, int *numRooms) {
     while (fread(&rooms[*numRooms], sizeof(Room), 1, file)) {
         (*numRooms)++;
     }
+    return 1;
 }
 // Hàm xóa phòng đấu giá
 int deleteRoom(int roomId) {

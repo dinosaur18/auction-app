@@ -25,13 +25,17 @@ CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
 SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
 					$(CONTROLLERS_DIR)/server_controller.c \
 					$(MODELS_DIR)/user/user.c \
+					$(MODELS_DIR)/room/room.c \
+					$(MODELS_DIR)/item/item.c 			
 
 CLIENT = client_exec
 SERVER = server_exec
 
 INCLUDES = 	-I$(AUTH_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
 			-I$(MODELS_DIR)/user -I$(CONTROLLERS_DIR) \
-			-I$(INCLUDE_DIR)
+			-I$(INCLUDE_DIR) \
+			-I$(MODELS_DIR)/room\
+			-I$(MODELS_DIR)/item
 
 # Quy tắc biên dịch
 all: $(CLIENT) $(SERVER)
