@@ -39,7 +39,6 @@ int authenticateUser(User user) {
     if (file == NULL) {
         return -1;
     }
-
     User registeredUser;
     while (fread(&registeredUser, sizeof(User), 1, file)) {
         if (strcmp(registeredUser.username, user.username) == 0 && strcmp(registeredUser.password, user.password) == 0) {

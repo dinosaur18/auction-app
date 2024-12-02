@@ -122,7 +122,7 @@ int main()
                     handle_login(new_sock, buffer);
                     break;
                 case REGISTER:
-                    handle_login(new_sock, buffer);
+                    handle_register(new_sock, buffer);
                     break;
                 case CREATE_ROOM: {
                     // Assuming buffer contains room name starting from index 1
