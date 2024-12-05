@@ -37,7 +37,6 @@ int main()
 
     printf("Connected to the server.\n");
     init_auth_view(sockfd);
-
     close(sockfd);
     return 0;
 }

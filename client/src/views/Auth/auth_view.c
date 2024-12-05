@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include "style_manager.h"
 #include "auth_view.h"
+#include "home_view.h"
 #include "auth_service.h"
 
 typedef struct
@@ -13,10 +14,26 @@ typedef struct
     GtkWidget *register_username;
     GtkWidget *register_password;
     GtkWidget *register_message;
+    GtkWidget *auth_window;
 } AuthContext;
 
-// Hàm đóng ứng dụng khi cửa sổ bị đóng
-void on_main_window_destroy()
+typedef struct
+{
+    int sockfd;
+    gchar *username;
+    gchar *password;
+    GtkWidget *auth_window;
+} LoginData;
+
+typedef struct
+{
+    int sockfd;
+    gchar *username;
+    gchar *password;
+    GtkWidget *auth_window;
+} RegisterData;
+
+void on_auth_window_destroy(GtkWidget *widget, gpointer user_data)
 {
     gtk_main_quit();
 }
@@ -28,13 +45,20 @@ void on_register_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->register_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->register_password));
 
-    
-
-    int result = handle_register(context->sockfd, username, password);
-    
-    if (result == 1) {
+    int user_id = handle_register(context->sockfd, username, password);
+    if (user_id > 0)
+    {
+        printf("Registered with User ID: %d\n", user_id);
         gtk_label_set_text(GTK_LABEL(context->register_message), "Register successful!");
-    } else {
+
+        // Ẩn cửa sổ đăng nhập
+        gtk_widget_hide(context->auth_window);
+
+        // Chuyển sang giao diện Home
+        init_home_view(context->sockfd, context->auth_window);
+    }
+    else
+    {
         gtk_label_set_text(GTK_LABEL(context->register_message), "Username already exists.");
     }
 }
@@ -46,13 +70,20 @@ void on_login_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->login_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->login_password));
 
-    
-
-    int result = handle_login(context->sockfd, username, password);
-    
-    if (result == 1) {
+    int user_id = handle_login(context->sockfd, username, password);
+    if (user_id > 0)
+    {
+        printf("Logged in with User ID: %d\n", user_id);
         gtk_label_set_text(GTK_LABEL(context->login_message), "Login successful!");
-    } else {
+
+        // Ẩn cửa sổ đăng nhập
+        gtk_widget_hide(context->auth_window);
+
+        // Chuyển sang giao diện Home
+        init_home_view(context->sockfd, context->auth_window);
+    }
+    else
+    {
         gtk_label_set_text(GTK_LABEL(context->login_message), "Invalid username or password.");
     }
 }
@@ -74,10 +105,11 @@ void init_auth_view(int sockfd)
     }
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_auth"));
-    g_signal_connect(window, "destroy", G_CALLBACK(on_main_window_destroy), NULL);
+    g_signal_connect(window, "destroy", G_CALLBACK(on_auth_window_destroy), NULL);
 
     AuthContext *context = g_malloc(sizeof(AuthContext));
     context->sockfd = sockfd;
+    context->auth_window = window;
     context->login_username = GTK_WIDGET(gtk_builder_get_object(builder, "login_username"));
     context->login_password = GTK_WIDGET(gtk_builder_get_object(builder, "login_password"));
     context->login_message = GTK_WIDGET(gtk_builder_get_object(builder, "login_msg"));
@@ -88,8 +120,8 @@ void init_auth_view(int sockfd)
     gtk_builder_connect_signals(builder, context);
 
     apply_css();
-
     gtk_widget_show_all(window);
+
     gtk_main();
 
     g_object_unref(builder);

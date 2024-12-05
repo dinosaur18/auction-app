@@ -2,6 +2,24 @@
 #include <string.h>
 #include "user.h"
 
+// Hàm để lấy ID người dùng tiếp theo (tăng dần)
+int getNextUserId() {
+    int nextUserId = 1;
+    FILE *file = fopen("data/users.dat", "rb");
+    if (file == NULL) {
+        return nextUserId; // Nếu file chưa tồn tại, bắt đầu với ID 1
+    }
+
+    User user;
+    while (fread(&user, sizeof(User), 1, file)) {
+        if (user.userId >= nextUserId) {
+            nextUserId ++;
+        }
+    }
+    fclose(file);
+    return nextUserId;
+}
+
 int saveUser(User user) {
     if (checkUserExists(user.username)) {
         return 0; // Username đã tồn tại
@@ -11,6 +29,8 @@ int saveUser(User user) {
     if (file == NULL) {
         return -1; 
     }
+
+    user.userId = getNextUserId();
 
     fwrite(&user, sizeof(User), 1, file);
     fclose(file);

@@ -29,11 +29,12 @@ int handle_login(int sockfd, const char *username, const char *password) {
 
     // Đọc phản hồi từ server
     memset(buffer, 0, BUFFER_SIZE);
-    
-    recv(sockfd, buffer, BUFFER_SIZE, 0);
-    printf("%d\n", buffer[0]);
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0) {
+        perror("Failed to receive response");
+        return -1;
+    }
 
-    return buffer[0];
+    return buffer[0]; // Trả về User ID
 }
 
 int handle_register(int sockfd, const char *username, const char *password) {
@@ -57,8 +58,10 @@ int handle_register(int sockfd, const char *username, const char *password) {
 
     // Đọc phản hồi từ server
     memset(buffer, 0, BUFFER_SIZE);
-    
-    recv(sockfd, buffer, BUFFER_SIZE, 0);
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0) {
+        perror("Failed to receive response");
+        return -1;
+    }
 
-    return buffer[0];
+    return buffer[0]; // Trả về User ID
 }
