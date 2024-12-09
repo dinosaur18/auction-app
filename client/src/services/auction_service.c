@@ -15,7 +15,7 @@ int handle_create_room(int sockfd, const char *room_name) {
     
     char buffer[BUFFER_SIZE];
     buffer[0] = CREATE_ROOM; 
-    strncpy(&buffer[1], room_name, sizeof(room_name));
+    memcpy(&buffer[1], room_name, strlen(room_name));
 
     // Gửi dữ liệu qua socket
     if (send(sockfd, buffer, sizeof(room_name) + 1, 0) < 0)
@@ -71,11 +71,11 @@ int handle_delete_room(int sockfd, int roomId) {
 int handle_create_item(int sockfd, int roomId, const char *name, int startingPrice, int buyNowPrice, int auctionTime) {
     char buffer[BUFFER_SIZE];
     Item item;
-    strncpy(item.roomId, room_id, sizeof(item.roomId));
+    item.roomId = roomId;
     strncpy(item.name, name, sizeof(item.name));
-    strncpy(item.startingPrice, startingPrice, sizeof(item.startingPrice));
-    strncpy(item.buyNowPrice, buyNowPrice, sizeof(item.buyNowPrice));
-    strncpy(item.auctionTime, auctionTime, sizeof(item.auctionTime));
+    item.startingPrice = startingPrice;
+    item.buyNowPrice = buyNowPrice;
+    item.auctionTime = auctionTime;
 
     // Đóng gói dữ liệu
     buffer[0] = CREATE_ITEM; 
@@ -127,7 +127,7 @@ int handle_delete_item(int sockfd, int itemId) {
 // Client gửi yêu cầu lấy danh sách tất cả các phòng đấu giá
 int handle_fetch_all_rooms(int sockfd, Room *rooms) {
     char buffer[BUFFER_SIZE];
-    buffer[0] = FETCH_ROOMS; 
+    buffer[0] = FETCH_ALL_ROOMS; 
 
     // Gửi yêu cầu qua socket
     if (send(sockfd, buffer, 1, 0) < 0) {
@@ -215,41 +215,41 @@ int handle_fetch_items(int sockfd, int room_id, Item *items) {
     return item_count; 
 }
 
-int handle_join_room(int sockfd, int roomId) {
-    char buffer[BUFFER_SIZE];
-    const char *session_id = get_session_id();
+// int handle_join_room(int sockfd, int roomId) {
+    // char buffer[BUFFER_SIZE];
+    // const char *session_id = get_session_id();
 
-    if (!session_id || strlen(session_id) == 0) {
-        fprintf(stderr, "Session not found. Please log in.\n");
-        return -1; // Session không hợp lệ
-    }
+    // if (!session_id || strlen(session_id) == 0) {
+    //     fprintf(stderr, "Session not found. Please log in.\n");
+    //     return -1; // Session không hợp lệ
+    // }
 
-    // Định dạng thông điệp gửi đi
-    buffer[0] = JOIN_ROOM; // Mã thông điệp tham gia phòng
-    strncpy(&buffer[1], session_id, strlen(session_id)); // Copy session ID vào buffer
-    strncpy(&buffer[1 + strlen(session_id)], room_id, strlen(room_id)); // Copy room ID vào buffer
+    // // Định dạng thông điệp gửi đi
+    // buffer[0] = JOIN_ROOM; // Mã thông điệp tham gia phòng
+    // strncpy(&buffer[1], session_id, strlen(session_id)); // Copy session ID vào buffer
+    // strncpy(&buffer[1 + strlen(session_id)], room_id, strlen(room_id)); // Copy room ID vào buffer
 
-    // Gửi yêu cầu qua socket
-    size_t message_size = 1 + strlen(session_id) + strlen(room_id);
-    if (send(sockfd, buffer, message_size, 0) < 0) {
-        perror("Failed to send join room request");
-        return -1; // Thất bại
-    }
+    // // Gửi yêu cầu qua socket
+    // size_t message_size = 1 + strlen(session_id) + strlen(room_id);
+    // if (send(sockfd, buffer, message_size, 0) < 0) {
+    //     perror("Failed to send join room request");
+    //     return -1; // Thất bại
+    // }
 
-    // Nhận phản hồi từ server
-    memset(buffer, 0, BUFFER_SIZE);
-    int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0) {
-        perror("Failed to receive response");
-        return -1;
-    }
+    // // Nhận phản hồi từ server
+    // memset(buffer, 0, BUFFER_SIZE);
+    // int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+    // if (bytes_received < 0) {
+    //     perror("Failed to receive response");
+    //     return -1;
+    // }
 
-    // Xử lý phản hồi từ server
-    if (buffer[0] == 1) { // Giả sử `1` là mã phản hồi thành công
-        printf("Successfully joined room with ID %s.\n", room_id);
-        return 1; // Thành công
-    } else {
-        printf("Failed to join room. Error code: %d\n", buffer[0]);
-        return 0; // Thất bại
-    }
-}
+    // // Xử lý phản hồi từ server
+    // if (buffer[0] == 1) { // Giả sử `1` là mã phản hồi thành công
+    //     printf("Successfully joined room with ID %s.\n", room_id);
+    //     return 1; // Thành công
+    // } else {
+    //     printf("Failed to join room. Error code: %d\n", buffer[0]);
+    //     return 0; // Thất bại
+    // }
+// }

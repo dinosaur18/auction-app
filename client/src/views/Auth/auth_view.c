@@ -17,22 +17,6 @@ typedef struct
     GtkWidget *auth_window;
 } AuthContext;
 
-typedef struct
-{
-    int sockfd;
-    gchar *username;
-    gchar *password;
-    GtkWidget *auth_window;
-} LoginData;
-
-typedef struct
-{
-    int sockfd;
-    gchar *username;
-    gchar *password;
-    GtkWidget *auth_window;
-} RegisterData;
-
 void on_auth_window_destroy(GtkWidget *widget, gpointer user_data)
 {
     gtk_main_quit();
@@ -45,10 +29,9 @@ void on_register_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->register_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->register_password));
 
-    int user_id = handle_register(context->sockfd, username, password);
-    if (user_id > 0)
+    int result = handle_register(context->sockfd, username, password);
+    if (result > 0)
     {
-        printf("Registered with User ID: %d\n", user_id);
         gtk_label_set_text(GTK_LABEL(context->register_message), "Register successful!");
 
         // Ẩn cửa sổ đăng nhập
@@ -70,10 +53,10 @@ void on_login_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->login_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->login_password));
 
-    int user_id = handle_login(context->sockfd, username, password);
-    if (user_id > 0)
+    int result = handle_login(context->sockfd, username, password);
+    printf("%d\n", result);
+    if (result > 0)
     {
-        printf("Logged in with User ID: %d\n", user_id);
         gtk_label_set_text(GTK_LABEL(context->login_message), "Login successful!");
 
         // Ẩn cửa sổ đăng nhập

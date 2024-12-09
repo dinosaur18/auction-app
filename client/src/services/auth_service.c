@@ -34,7 +34,7 @@ int handle_login(int sockfd, const char *username, const char *password) {
         return -1;
     }
 
-    return buffer[0]; // Trả về User ID
+    return buffer[0];
 }
 
 int handle_register(int sockfd, const char *username, const char *password) {
@@ -63,5 +63,5 @@ int handle_register(int sockfd, const char *username, const char *password) {
         return -1;
     }
 
-    return buffer[0]; // Trả về User ID
+    return buffer[0]; 
 }

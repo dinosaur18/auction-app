@@ -34,7 +34,7 @@ int saveUser(User user) {
 
     fwrite(&user, sizeof(User), 1, file);
     fclose(file);
-    return 1;
+    return user.userId;
 }
 
 int checkUserExists(const char *username) {
@@ -63,7 +63,7 @@ int authenticateUser(User user) {
     while (fread(&registeredUser, sizeof(User), 1, file)) {
         if (strcmp(registeredUser.username, user.username) == 0 && strcmp(registeredUser.password, user.password) == 0) {
             fclose(file);
-            return 1; 
+            return registeredUser.userId; 
         }
     }
     fclose(file);

@@ -13,6 +13,7 @@ SERVICES_DIR = $(CLIENT_DIR)/services
 SERVER_DIR = server/src
 MODELS_DIR = $(SERVER_DIR)/models
 CONTROLLERS_DIR = $(SERVER_DIR)/controllers
+SESSION_DIR = $(SERVER_DIR)/session
 
 INCLUDE_DIR = include
 
@@ -27,6 +28,7 @@ CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
 
 SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
 					$(CONTROLLERS_DIR)/server_controller.c \
+					$(SESSION_DIR)/session_manager.c \
 					$(MODELS_DIR)/user/user.c \
 					$(MODELS_DIR)/room/room.c \
 					$(MODELS_DIR)/item/item.c 			
@@ -37,6 +39,7 @@ SERVER = server_exec
 INCLUDES = 	-I$(AUTH_DIR) -I$(HOME_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
 			-I$(MODELS_DIR)/user -I$(MODELS_DIR)/room -I$(MODELS_DIR)/item \
 			-I$(CONTROLLERS_DIR) \
+			-I$(SESSION_DIR) \
 			-I$(INCLUDE_DIR) \
 
 # Quy tắc biên dịch

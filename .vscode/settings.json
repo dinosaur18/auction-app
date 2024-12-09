@@ -3,6 +3,7 @@
     "files.associations": {
         "style_manager.h": "c",
         "user_controller.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "message_type.h": "c"
     }
 }
