@@ -10,9 +10,55 @@ void on_home_window_destroy(GtkWidget *widget, gpointer user_data)
     gtk_widget_show(auth_window);
 }
 
-void on_create_room_button_clicked(GtkWidget *button, gpointer user_data)
+////////////////// CREATE ROOM FORM //////////////////
+
+typedef struct
 {
-    printf("Clicked!\n");
+    int sockfd;
+    GtkWidget *create_room_form;
+    GtkWidget *room_name;
+    GtkWidget *create_room_msg;
+    GtkFlowBox *room_list;
+    GtkWidget *room_card;
+} RoomListContext;
+
+void show_create_room_form(GtkWidget *button, gpointer user_data)
+{
+    RoomListContext *context = (RoomListContext *)user_data;
+
+    GtkWidget *form = GTK_WIDGET(context->create_room_form);
+    gtk_widget_show(form);
+}
+
+void on_create_room_ok(GtkWidget *button, gpointer user_data)
+{
+    RoomListContext *context = (RoomListContext *)user_data;
+
+    GtkWidget *form = GTK_WIDGET(context->create_room_form);
+    const gchar *room_name = gtk_entry_get_text(GTK_ENTRY(context->room_name));
+
+    printf("%s\n", room_name);
+
+    int roomId = handle_create_room(context->sockfd, room_name);
+    if (roomId > 0)
+    {
+        gtk_widget_hide(form);
+        GtkWidget *room_card = gtk_button_new_with_label(room_name);
+        gtk_flow_box_insert(room_list, room_card, -1);
+        gtk_widget_show(room_card);
+    }
+    else
+    {
+        gtk_label_set_text(GTK_LABEL(context->create_room_msg), "This room's name already exists.");
+    }
+}
+
+void on_create_room_cancel(GtkWidget *button, gpointer user_data)
+{
+    RoomListContext *context = (RoomListContext *)user_data;
+
+    GtkWidget *form = GTK_WIDGET(context->create_room_form);
+    gtk_widget_hide(form);
 }
 
 void init_home_view(int sockfd, GtkWidget *auth_window)
@@ -32,7 +78,14 @@ void init_home_view(int sockfd, GtkWidget *auth_window)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_home"));
     g_signal_connect(window, "destroy", G_CALLBACK(on_home_window_destroy), auth_window);
 
-    gtk_builder_connect_signals(builder, NULL);
+    RoomListContext *roomListContext = g_malloc(sizeof(RoomListContext));
+    roomListContext->sockfd = sockfd;
+    roomListContext->create_room_form = GTK_WIDGET(gtk_builder_get_object(builder, "create_room_form"));
+    roomListContext->room_name = GTK_WIDGET(gtk_builder_get_object(builder, "room_name"));
+    roomListContext->create_room_msg = GTK_WIDGET(gtk_builder_get_object(builder, "create_room_msg"));
+    roomListContext->room_list = GTK_FLOW_BOX(gtk_builder_get_object(builder, "room_list"));
+
+    gtk_builder_connect_signals(builder, roomListContext);
 
     apply_css();
     gtk_widget_show_all(window);
