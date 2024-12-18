@@ -25,6 +25,8 @@ CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
 					$(SERVICES_DIR)/auth_service.c \
 					$(SERVICES_DIR)/auction_service.c \
 					$(MODELS_DIR)/user/user.c \
+					$(MODELS_DIR)/room/room.c \
+					$(MODELS_DIR)/item/item.c 
 
 SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
 					$(CONTROLLERS_DIR)/server_controller.c \

@@ -4,6 +4,8 @@
         "style_manager.h": "c",
         "user_controller.h": "c",
         "socket.h": "c",
-        "message_type.h": "c"
+        "message_type.h": "c",
+        "server_controller.h": "c",
+        "session_manager.h": "c"
     }
 }
