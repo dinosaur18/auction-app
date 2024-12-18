@@ -5,7 +5,8 @@
         "user_controller.h": "c",
         "socket.h": "c",
         "message_type.h": "c",
-        "server_controller.h": "c",
-        "session_manager.h": "c"
+        "session_manager.h": "c",
+        "home_view.h": "c",
+        "server_controller.h": "c"
     }
 }

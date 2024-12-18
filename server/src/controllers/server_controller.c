@@ -4,10 +4,9 @@
 #include "user.h"
 #include "message_type.h"
 #include "session_manager.h"
+#include "server_controller.h"
 #include "room.h"
 #include "item.h"
-
-#define BUFFER_SIZE 1024
 
 void handle_login(int client_socket, char buffer[BUFFER_SIZE])
 {
@@ -63,44 +62,77 @@ void handle_register(int client_socket, char buffer[BUFFER_SIZE])
     }
 }
 
-void handleCreateRoom(int sockfd, const char *roomName)
+void handleCreateRoom(int client_socket, const char *roomName)
 {
-    // Kiểm tra nếu tên phòng hợp lệ
-    if (roomName == NULL || strlen(roomName) == 0)
-    {
-        send(sockfd, "Invalid room name.", 23, 0);
-        return;
-    }
+    ClientSession *session = find_session_by_socket(client_socket);
 
-    // Tạo phòng đấu giá mới
-    if (createRoom(roomName))
+    if (session != NULL)
     {
-        send(sockfd, "The auction room has been successfully created.", 38, 0);
+        int response = createRoom(roomName, session->username);
+        send(client_socket, &response, 1, 0);
     }
     else
     {
-        send(sockfd, "Error creating auction room.", 26, 0);
+        int response = 0;
+        send(client_socket, &response, 1, 0);
     }
 }
 
-// // Hàm liệt kê các phòng đã tồn tại
-// void handleListRooms() {
-//     Room rooms[100];
-//     int numRooms = 0;
+void handleFetchAllRoom(int client_socket)
+{
+    char buffer[BUFFER_SIZE];
+    Room rooms[MAX_ROOMS];
+    int room_count = loadRooms(rooms, NULL);
 
-//     if (loadRooms(rooms, &numRooms)) {
-//         if (numRooms == 0) {
-//             printf("No auction rooms available.\n");
-//         } else {
-//             printf("List of auction rooms:\n");
-//             for (int i = 0; i < numRooms; i++) {
-//                 printf("ID: %d, Tên: %s\n", rooms[i].roomId, rooms[i].roomName);
-//             }
-//         }
-//     } else {
-//         printf("Unable to load auction room.\n");
-//     }
-// }
+    if (room_count < 0)
+    {
+        int response = 0;
+        send(client_socket, &response, 1, 0);
+        return;
+    }
+
+    memcpy(&buffer[0], &room_count, 1);
+    memcpy(&buffer[1], &rooms, room_count * sizeof(Room));
+
+    if (send(client_socket, buffer, (room_count * sizeof(Room)) + 1, 0) < 0)
+    {
+        perror("Error sending room data");
+        return;
+    }
+}
+
+void handleFetchOwnRoom(int client_socket)
+{
+    ClientSession *session = find_session_by_socket(client_socket);
+
+    if (session != NULL)
+    {
+        char buffer[BUFFER_SIZE];
+        Room rooms[MAX_ROOMS];
+        int room_count = loadRooms(rooms, session->username);
+
+        if (room_count < 0)
+        {
+            int response = 0;
+            send(client_socket, &response, 1, 0);
+            return;
+        }
+
+        memcpy(&buffer[0], &room_count, 1);
+        memcpy(&buffer[1], &rooms, room_count * sizeof(Room));
+
+        if (send(client_socket, buffer, (room_count * sizeof(Room)) + 1, 0) < 0)
+        {
+            perror("Error sending room data");
+            return;
+        }
+    }
+    else
+    {
+        int response = 0;
+        send(client_socket, &response, 1, 0);
+    }
+}
 
 // Hàm xóa phòng đấu giá
 void handleDeleteRoom(int sockfd, int roomId)

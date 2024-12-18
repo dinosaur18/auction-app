@@ -11,6 +11,19 @@ typedef struct {
     char password[MAX_LENGTH];
 } User;
 
+#define MAX_ROOM_NAME_LENGTH 100
+
+#define MAX_ROOMS 100
+
+// Cấu trúc thông tin phòng đấu giá
+typedef struct {
+    int roomId;                    // ID của phòng
+    char roomName[MAX_ROOM_NAME_LENGTH]; // Tên phòng đấu giá
+    int numUsers;                  // Số người tham gia
+    int numItems;                  // Số vật phẩm trong phòng
+    char username[MAX_LENGTH];
+} Room;
+
 // Hàm đăng ký người dùng
 void registerUser() {
     FILE *file = fopen("data/users.dat", "ab");
@@ -47,6 +60,25 @@ void displayUsers() {
     while (fread(&user, sizeof(User), 1, file)) {
         printf("Tên người dùng: %s\n", user.username);
         printf("Password: %s\n", user.password);
+        printf("-----------------------------\n");
+    }
+    fclose(file);
+}
+
+void displayRooms() {
+    FILE *file = fopen("data/rooms.dat", "rb");
+    if (file == NULL) {
+        printf("Không có thông tin người dùng.\n");
+        return;
+    }
+    
+    Room room;
+    printf("\nDanh sách room:\n");
+    printf("---------------------------------\n");
+    
+    while (fread(&room, sizeof(Room), 1, file)) {
+        printf("Tên phòng: %s\n", room.roomName);
+        printf("user: %s\n", room.username);
         printf("-----------------------------\n");
     }
     fclose(file);
@@ -107,7 +139,7 @@ int main() {
                 displayUsers();
                 break;
             case 4:
-                printf("Thoát chương trình.\n");
+                displayRooms();
                 break;
             default:
                 printf("Lựa chọn không hợp lệ.\n");

@@ -6,8 +6,10 @@
 #include <string.h>
 
 #define MAX_ROOM_NAME_LENGTH 100
-#define MAX_USERS_IN_ROOM 10
-#define MAX_ITEMS_IN_ROOM 10
+#define MAX_LENGTH 50
+
+#define ROOM_DATA "data/rooms.dat"
+#define MAX_ROOMS 100
 
 // Cấu trúc thông tin phòng đấu giá
 typedef struct {
@@ -15,16 +17,13 @@ typedef struct {
     char roomName[MAX_ROOM_NAME_LENGTH]; // Tên phòng đấu giá
     int numUsers;                  // Số người tham gia
     int numItems;                  // Số vật phẩm trong phòng
-    char users[MAX_USERS_IN_ROOM][MAX_ROOM_NAME_LENGTH]; // Danh sách người dùng tham gia
-    char items[MAX_ITEMS_IN_ROOM][MAX_ROOM_NAME_LENGTH]; // Danh sách vật phẩm trong phòng
-    int userId;
+    char username[MAX_LENGTH];
 } Room;
 
 // Khai báo các hàm thao tác với phòng đấu giá
-int saveRoom(Room room);
-int checkRoomExists(int roomId);
-int loadRooms(Room *rooms, int *numRooms);
-int createRoom(const char *roomName);
+int checkRoomExists(Room room);
+int loadRooms(Room *rooms, const char *username);
+int createRoom(const char *roomName, const char *username);
 int getNextRoomId();
 int deleteRoom(int roomId);
 

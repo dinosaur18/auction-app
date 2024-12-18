@@ -49,8 +49,8 @@ button:focus {
     background-color: #02E079;
     color: #fff;
     font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 15px;
+    /* padding: 10px 20px;
+    border-radius: 15px; */
 }
 
 .custom_button:hover {
@@ -83,4 +83,10 @@ button:focus {
     color: #fff;
     font-weight: bold;
     border-bottom: 3px solid #02E079;
+}
+
+.room_card {
+    background-color: #013243;
+    border-radius: 15px;
+    padding: 10px 15px;
 }

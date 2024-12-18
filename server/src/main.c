@@ -9,7 +9,6 @@
 #include "session_manager.h"
 
 #define PORT 8080
-#define BUFFER_SIZE 100
 #define MAX_USERS 100
 
 int main()
@@ -113,8 +112,7 @@ int main()
                             break;
                         case CREATE_ROOM:
                         {
-                            // Assuming buffer contains room name starting from index 1
-                            handleCreateRoom(fd, buffer + 1);
+                            handleCreateRoom(fd, buffer);
                             break;
                         }
                         case DELETE_ROOM:
@@ -124,10 +122,14 @@ int main()
                             handleDeleteRoom(fd, roomId); // Use correct handler for delete room
                             break;
                         }
-                        // case LIST_ROOMS: {
-                        //     handleListRooms(new_sock);
-                        //     break;
-                        // }
+                        case FETCH_ALL_ROOMS: {
+                            handleFetchAllRoom(fd);
+                            break;
+                        }
+                        case FETCH_OWN_ROOMS: {
+                            handleFetchOwnRoom(fd);
+                            break;
+                        }
                         case CREATE_ITEM:
                         {
                             handleCreateItem(fd, buffer + 1);
