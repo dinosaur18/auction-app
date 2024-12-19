@@ -38,7 +38,7 @@ void on_register_button_clicked(GtkWidget *button, gpointer user_data)
         gtk_widget_hide(context->auth_window);
 
         // Chuyển sang giao diện Home
-        init_home_view(context->sockfd, context->auth_window);
+        init_home_view(context->sockfd, context->auth_window, username);
     }
     else
     {
@@ -63,7 +63,7 @@ void on_login_button_clicked(GtkWidget *button, gpointer user_data)
         gtk_widget_hide(context->auth_window);
 
         // Chuyển sang giao diện Home
-        init_home_view(context->sockfd, context->auth_window);
+        init_home_view(context->sockfd, context->auth_window, username);
     }
     else
     {

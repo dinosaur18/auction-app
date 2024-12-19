@@ -7,6 +7,7 @@ GTK_FLAGS = `pkg-config --cflags --libs gtk+-3.0`
 CLIENT_DIR = client/src
 AUTH_DIR = $(CLIENT_DIR)/views/Auth
 HOME_DIR = $(CLIENT_DIR)/views/Home
+AUCTION_DIR = $(CLIENT_DIR)/views/Auction
 UTILS_DIR = $(CLIENT_DIR)/utils
 SERVICES_DIR = $(CLIENT_DIR)/services
 
@@ -21,6 +22,7 @@ INCLUDE_DIR = include
 CLIENT_SOURCES = 	$(CLIENT_DIR)/main.c \
 					$(AUTH_DIR)/auth_view.c \
 					$(HOME_DIR)/home_view.c \
+					$(AUCTION_DIR)/auction_view.c \
 					$(UTILS_DIR)/style_manager.c \
 					$(SERVICES_DIR)/auth_service.c \
 					$(SERVICES_DIR)/auction_service.c \
@@ -38,7 +40,7 @@ SERVER_SOURCES = 	$(SERVER_DIR)/main.c \
 CLIENT = client_exec
 SERVER = server_exec
 
-INCLUDES = 	-I$(AUTH_DIR) -I$(HOME_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
+INCLUDES = 	-I$(AUTH_DIR) -I$(HOME_DIR) -I$(AUCTION_DIR) -I$(UTILS_DIR) -I$(SERVICES_DIR) \
 			-I$(MODELS_DIR)/user -I$(MODELS_DIR)/room -I$(MODELS_DIR)/item \
 			-I$(CONTROLLERS_DIR) \
 			-I$(SESSION_DIR) \

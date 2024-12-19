@@ -38,6 +38,10 @@ button:focus {
     font-weight: bold;
 }
 
+.bg_primary {
+    background-color: #013243;
+}
+
 .custom_form {
     /* width: 1280px; */
     padding: 60px 120px;

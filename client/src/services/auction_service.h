@@ -13,6 +13,6 @@ int handle_fetch_all_rooms(int sockfd, Room *rooms);
 int handle_fetch_own_rooms(int sockfd, Room *rooms);
 int handle_fetch_bidding_items(int sockfd, Item *items);
 int handle_fetch_items(int sockfd, int room_id, Item *items);
-int handle_join_room(int sockfd, int roomId);
+int handle_join_room(int sockfd, int room_id);
 
 #endif 

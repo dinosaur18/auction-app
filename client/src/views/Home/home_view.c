@@ -1,11 +1,14 @@
 #include <gtk/gtk.h>
 #include "style_manager.h"
 #include "home_view.h"
+#include "auction_view.h"
 #include "auction_service.h"
 
 typedef struct
 {
     int sockfd;
+    GtkWidget *home_window;
+
     GtkWidget *dashboard;
     GtkWidget *room_item;
     GtkFlowBox *room_list_all;
@@ -30,6 +33,7 @@ void on_home_window_destroy(GtkWidget *widget, gpointer user_data)
 
 GtkWidget *create_room_card(Room room, gpointer user_data)
 {
+    AppContext *context = (AppContext *)user_data;
 
     GtkBuilder *builder;
     GtkWidget *card;
@@ -42,6 +46,7 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
         g_clear_error(&error);
         return NULL;
     }
+    gtk_builder_connect_signals(builder, context);
 
     card = GTK_WIDGET(gtk_builder_get_object(builder, "room_card"));
 
@@ -53,23 +58,34 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
 
     // Tìm và cập nhật nội dung trong card
     GtkWidget *label_room_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_name"));
-    // GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));
-    // GtkWidget *label_item_count = GTK_WIDGET(gtk_builder_get_object(builder, "label_item_count"));
+    GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));
+    GtkWidget *label_item_count = GTK_WIDGET(gtk_builder_get_object(builder, "label_item_count"));
 
     if (GTK_IS_LABEL(label_room_name))
+    {
         gtk_label_set_text(GTK_LABEL(label_room_name), room.roomName);
-
-    // if (GTK_IS_LABEL(label_room_owner))
-    //     gtk_label_set_text(GTK_LABEL(label_room_name), room.username);
-
-    // if (GTK_IS_LABEL(label_item_count))
-    // {
-    //     char item_count_text[32];
-    //     snprintf(item_count_text, sizeof(item_count_text), "%d items", room.numItems);
-    //     gtk_label_set_text(GTK_LABEL(label_item_count), item_count_text);
-    // }
+    }
+    if (GTK_IS_LABEL(label_room_owner))
+    {
+        gtk_label_set_text(GTK_LABEL(label_room_owner), room.username);
+    }
+    if (GTK_IS_LABEL(label_item_count))
+    {
+        char item_count_text[32];
+        snprintf(item_count_text, sizeof(item_count_text), "%d", room.numItems);
+        gtk_label_set_text(GTK_LABEL(label_item_count), item_count_text);
+    }
 
     return card;
+}
+
+void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
+{
+    AppContext *context = (AppContext *)user_data;
+
+    gtk_widget_hide(context->home_window);
+
+    init_auction_view(context->sockfd, context->home_window);
 }
 
 void fetch_all_room(gpointer user_data)
@@ -90,7 +106,7 @@ void fetch_all_room(gpointer user_data)
     for (int i = 0; i < room_count; i++)
     {
 
-        GtkWidget *room_card = create_room_card(rooms[i], context); // Hiển thị tên phòng
+        GtkWidget *room_card = create_room_card(rooms[i], context); 
         gtk_flow_box_insert(context->room_list_all, room_card, -1);
     }
 
@@ -100,11 +116,13 @@ void fetch_all_room(gpointer user_data)
 
 ////////////////// MY AUCTION PAGE //////////////////
 
-void fetch_own_room(int sockfd, GtkFlowBox *room_list)
+void fetch_own_room(gpointer user_data)
 {
+    AppContext *context = (AppContext *)user_data;
+
     // Tạo mảng Room để lưu danh sách phòng nhận được
     Room rooms[MAX_ROOMS];
-    int room_count = handle_fetch_own_rooms(sockfd, rooms);
+    int room_count = handle_fetch_own_rooms(context->sockfd, rooms);
 
     if (room_count < 0)
     {
@@ -115,15 +133,13 @@ void fetch_own_room(int sockfd, GtkFlowBox *room_list)
     // Duyệt qua danh sách phòng và thêm vào GTK_FLOW_BOX
     for (int i = 0; i < room_count; i++)
     {
-        printf("Phòng của toi: %s\n", rooms[i].roomName);
-        printf("user: %s\n", rooms[i].username);
-        printf("-----------------------------\n");
-        GtkWidget *room_button = gtk_button_new_with_label(rooms[i].roomName); // Hiển thị tên phòng
-        gtk_flow_box_insert(room_list, room_button, -1);
+
+        GtkWidget *room_card = create_room_card(rooms[i], context); 
+        gtk_flow_box_insert(context->room_list, room_card, -1);
     }
 
     // Hiển thị các widget vừa thêm
-    gtk_widget_show_all(GTK_WIDGET(room_list));
+    gtk_widget_show_all(GTK_WIDGET(context->room_list));
 }
 
 void show_create_room_form(GtkWidget *button, gpointer user_data)
@@ -205,11 +221,11 @@ void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
         clear_all_children(context->room_list);
 
         // // Fetch lại danh sách các phòng của người dùng
-        fetch_own_room(context->sockfd, context->room_list);
+        fetch_own_room(context);
     }
 }
 
-void init_home_view(int sockfd, GtkWidget *auth_window)
+void init_home_view(int sockfd, GtkWidget *auth_window, const char *username)
 {
     GtkBuilder *builder;
     GtkWidget *window;
@@ -225,9 +241,12 @@ void init_home_view(int sockfd, GtkWidget *auth_window)
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_home"));
     g_signal_connect(window, "destroy", G_CALLBACK(on_home_window_destroy), auth_window);
+    GtkWidget *label_username = GTK_WIDGET(gtk_builder_get_object(builder, "label_username"));
+    gtk_label_set_text(GTK_LABEL(label_username), username);
 
     AppContext *appContext = g_malloc(sizeof(AppContext));
     appContext->sockfd = sockfd;
+    appContext->home_window = window;
 
     appContext->dashboard = GTK_WIDGET(gtk_builder_get_object(builder, "dashboard"));
     appContext->room_list_all = GTK_FLOW_BOX(gtk_builder_get_object(builder, "room_list_all"));

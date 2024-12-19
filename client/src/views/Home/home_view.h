@@ -3,6 +3,6 @@
 #include <gtk/gtk.h>
 
 // Khai báo hàm hoặc cấu trúc
-void init_home_view(int sockfd, GtkWidget *auth_window;);
+void init_home_view(int sockfd, GtkWidget *auth_window, const char *username);
 
 #endif
