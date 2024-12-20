@@ -179,6 +179,7 @@ int handle_fetch_own_rooms(int sockfd, Room *rooms)
     return room_count;
 }
 
+
 // Client gửi yêu cầu lấy danh sách các vật phẩm đang đấu giá
 int handle_fetch_bidding_items(int sockfd, Item *items)
 {

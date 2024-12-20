@@ -21,6 +21,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_add_item_cancel" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -34,6 +35,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
+                <signal name="clicked" handler="on_add_item_ok" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -409,7 +411,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkListBox" id="listbox">
+                  <object class="GtkListBox" id="item_list">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                   </object>
@@ -432,6 +434,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <signal name="clicked" handler="show_add_item_form" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -440,7 +443,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="start_auction_bnt">
                         <property name="label" translatable="yes">Start Auction</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>

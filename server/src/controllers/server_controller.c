@@ -151,36 +151,6 @@ void handleDeleteRoom(int sockfd, int room_id)
     }
 }
 
-// Hàm xử lý tạo vật phẩm
-void handleCreateItem(int sockfd, const char *itemData)
-{
-    // Giả sử itemData chứa thông tin vật phẩm dưới dạng chuỗi, cần phân tích để tạo Item
-    Item newItem;
-    sscanf(itemData, "%d %s %d %d %d", &newItem.item_id, newItem.name, &newItem.startingPrice, &newItem.buyNowPrice, &newItem.auctionTime);
-
-    if (saveItem(newItem) > 0)
-    {
-        send(sockfd, "The item has been successfully created.", 30, 0);
-    }
-    else
-    {
-        send(sockfd, "Error creating item.", 20, 0);
-    }
-}
-
-// Hàm xử lý xóa vật phẩm
-void handleDeleteItem(int sockfd, int item_id)
-{
-    if (deleteItem(item_id) > 0)
-    {
-        send(sockfd, "The item has been successfully deleted.", 30, 0);
-    }
-    else
-    {
-        send(sockfd, "Error deleting item.", 20, 0);
-    }
-}
-
 void handleJoinRoom(int client_socket, int room_id)
 {
 
@@ -220,17 +190,52 @@ void handleJoinRoom(int client_socket, int room_id)
     }
 }
 
-void handleFetchItems(int client_socket, int room_id) {
-    char buffer[BUFFER_SIZE];
+void handleCreateItem(int sockfd, char buffer[BUFFER_SIZE]) {
+    Item item;
+
+    // Kiểm tra nếu buffer đủ dữ liệu
+    if (BUFFER_SIZE < sizeof(Item) + 1) {
+        int response = 0; // Thất bại
+        send(sockfd, &response, sizeof(response), 0);
+        return;
+    }
+
+    memcpy(&item, &buffer[1], sizeof(Item));
+
+    if (createItem(item.item_id, item.name, item.startingPrice, item.buyNowPrice, item.auctionTime, item.room_id) > 0) {
+        int response = 1; // Thành công
+        send(sockfd, &response, sizeof(response), 0);
+    } else {
+        int response = 0; // Thất bại
+        send(sockfd, &response, sizeof(response), 0);
+    }
+}
+
+void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]) {
+    int room_id;
+    memcpy(&room_id, &buffer[1], sizeof(int)); // Deserialize room_id từ buffer
+
     Item items[MAX_ITEM_IN_ROOM];
     int item_count = loadItems(room_id, items);
 
-    memcpy(&buffer[0], &item_count, 1);
-    memcpy(&buffer[1], &items, item_count * sizeof(Item));
+    char send_buffer[BUFFER_SIZE];
+    memcpy(&send_buffer[0], &item_count, sizeof(int));
+    memcpy(&send_buffer[4], items, item_count * sizeof(Item));
 
-    if (send(client_socket, buffer, (item_count * sizeof(Item)) + 1, 0) < 0)
-    {
-        perror("Error sending room data");
-        return;
+    if (send(client_socket, send_buffer, sizeof(int) + item_count * sizeof(Item), 0) < 0) {
+        perror("Error sending item data");
     }
 }
+
+
+
+void handleDeleteItem(int sockfd, int item_id) {
+    if (deleteItem(item_id) > 0) {
+        char response[] = "The item has been successfully deleted.";
+        send(sockfd, response, strlen(response), 0);
+    } else {
+        char response[] = "Error deleting item.";
+        send(sockfd, response, strlen(response), 0);
+    }
+}
+

@@ -133,18 +133,18 @@ int main()
                         }
                         case CREATE_ITEM:
                         {
-                            handleCreateItem(fd, buffer + 1);
+                            handleCreateItem(fd, buffer);
                             break;
                         }
-                        // case LIST_ITEMS: {
-                        //     int roomId = atoi(buffer + 1);
-                        //     handleListItems(new_sock, roomId);
-                        //     break;
-                        // }
+                        case FETCH_ITEMS:
+                        {
+                            handleFetchItems(fd, buffer);
+                            break;
+                        }
                         case DELETE_ITEM:
                         {
-                            int itemId = atoi(buffer + 1);
-                            handleDeleteItem(fd, itemId);
+                            int item_id = atoi(buffer + 1);
+                            handleDeleteItem(fd, item_id);
                             break;
                         }
                         case JOIN_ROOM: {
