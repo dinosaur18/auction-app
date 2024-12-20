@@ -64,9 +64,6 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
         snprintf(joiner_count_text, sizeof(joiner_count_text), "%d", room.numUsers);
         gtk_label_set_text(GTK_LABEL(label_room_joiner), joiner_count_text);
     }
-    if (role == 2) {
-        gtk_widget_hide(add_button);
-    }
 
 
     AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
@@ -76,6 +73,9 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
 
     apply_css();
     gtk_widget_show_all(window);
+    if (role == 2) {
+        gtk_widget_hide(add_button);
+    }
 
     g_object_unref(builder);
 }

@@ -14,10 +14,10 @@ int handle_create_room(int sockfd, const char *room_name)
 
     char buffer[BUFFER_SIZE];
     buffer[0] = CREATE_ROOM;
-    memcpy(&buffer[1], room_name, strlen(room_name));
+    memcpy(&buffer[1], room_name, MAX_LENGTH);
 
     // Gửi dữ liệu qua socket
-    if (send(sockfd, buffer, sizeof(room_name) + 1, 0) < 0)
+    if (send(sockfd, buffer, MAX_LENGTH + 1, 0) < 0)
     {
         perror("Failed to send create room request");
         return 0;
