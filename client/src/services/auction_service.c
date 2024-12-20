@@ -8,8 +8,6 @@
 #include "room.h"
 #include "item.h"
 
-#define BUFFER_SIZE 1024
-
 // Client gửi yêu cầu tạo phòng đấu giá
 int handle_create_room(int sockfd, const char *room_name)
 {
@@ -37,16 +35,16 @@ int handle_create_room(int sockfd, const char *room_name)
 }
 
 // Client gửi yêu cầu xoá phòng đấu giá
-int handle_delete_room(int sockfd, int roomId)
+int handle_delete_room(int sockfd, int item_id)
 {
     char buffer[BUFFER_SIZE];
 
     // Đóng gói dữ liệu
     buffer[0] = DELETE_ROOM;
-    memcpy(&buffer[1], &roomId, sizeof(roomId));
+    memcpy(&buffer[1], &item_id, sizeof(item_id));
 
     // Gửi dữ liệu qua socket
-    if (send(sockfd, buffer, sizeof(roomId) + 1, 0) < 0)
+    if (send(sockfd, buffer, sizeof(item_id) + 1, 0) < 0)
     {
         perror("Failed to send delete room request");
         return -1;
@@ -64,11 +62,11 @@ int handle_delete_room(int sockfd, int roomId)
 }
 
 // Client gửi yêu cầu tạo vật phẩm đấu giá
-int handle_create_item(int sockfd, int roomId, const char *name, int startingPrice, int buyNowPrice, int auctionTime)
+int handle_create_item(int sockfd, int item_id, const char *name, int startingPrice, int buyNowPrice, int auctionTime)
 {
     char buffer[BUFFER_SIZE];
     Item item;
-    item.roomId = roomId;
+    item.room_id = item_id;
     strncpy(item.name, name, sizeof(item.name));
     item.startingPrice = startingPrice;
     item.buyNowPrice = buyNowPrice;
@@ -234,39 +232,31 @@ int handle_fetch_items(int sockfd, int room_id, Item *items)
     return item_count;
 }
 
-int handle_join_room(int sockfd, int room_id)
+int handle_join_room(int sockfd, int room_id, Room *room)
 {
     char buffer[BUFFER_SIZE];
 
     // Định dạng thông điệp gửi đi
     buffer[0] = JOIN_ROOM;                                   
-    strncpy(&buffer[1], room_id, strlen(room_id));        
+    buffer[1] = room_id;                    
 
     // Gửi yêu cầu qua socket
-    if (send(sockfd, buffer, message_size, 0) < 0)
+    if (send(sockfd, buffer, 2, 0) < 0)
     {
         perror("Failed to send join room request");
         return -1; 
     }
 
-    // Nhận phản hồi từ server
-    memset(buffer, 0, BUFFER_SIZE);
-    int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-    if (bytes_received < 0)
+    // Nhận danh sách phòng từ server
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
     {
         perror("Failed to receive response");
         return -1;
     }
 
-    // Xử lý phản hồi từ server
-    if (buffer[0] == 1)
-    { // Giả sử `1` là mã phản hồi thành công
-        printf("Successfully joined room with ID %s.\n", room_id);
-        return 1; // Thành công
-    }
-    else
-    {
-        printf("Failed to join room. Error code: %d\n", buffer[0]);
-        return 0; // Thất bại
-    }
+    int role = buffer[0]; // buffer[0] trả về role của client tham gia phòng
+
+    memcpy(room, &buffer[1], sizeof(Room));
+
+    return role; 
 }

@@ -17,7 +17,7 @@ typedef struct {
 
 // Cấu trúc thông tin phòng đấu giá
 typedef struct {
-    int roomId;                    // ID của phòng
+    int room_id;                    // ID của phòng
     char roomName[MAX_ROOM_NAME_LENGTH]; // Tên phòng đấu giá
     int numUsers;                  // Số người tham gia
     int numItems;                  // Số vật phẩm trong phòng
@@ -77,6 +77,7 @@ void displayRooms() {
     printf("---------------------------------\n");
     
     while (fread(&room, sizeof(Room), 1, file)) {
+        printf("id: %d\n", room.room_id);
         printf("Tên phòng: %s\n", room.roomName);
         printf("user: %s\n", room.username);
         printf("-----------------------------\n");

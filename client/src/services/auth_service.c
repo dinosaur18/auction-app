@@ -6,8 +6,6 @@
 #include "message_type.h"
 #include "user.h"
 
-#define BUFFER_SIZE 1024
-
 int handle_login(int sockfd, const char *username, const char *password) {
 
     char buffer[BUFFER_SIZE];    

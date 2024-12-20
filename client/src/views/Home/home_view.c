@@ -21,12 +21,29 @@ typedef struct
     GtkWidget *room_card;
 } AppContext;
 
+typedef struct
+{
+    int sockfd;
+    int room_id;
+    GtkWidget *home_window;
+} RoomContext;
+
 void on_home_window_destroy(GtkWidget *widget, gpointer user_data)
 {
     GtkWidget *auth_window = (GtkWidget *)user_data;
 
     // Hiển thị lại cửa sổ đăng nhập khi cửa sổ Home bị đóng
     gtk_widget_show(auth_window);
+}
+
+void clear_all_children(GtkFlowBox *flowbox)
+{
+    GList *children = gtk_container_get_children(GTK_CONTAINER(flowbox));
+    for (GList *iter = children; iter != NULL; iter = iter->next)
+    {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    }
+    g_list_free(children);
 }
 
 ////////////////// DASHBOARD PAGE //////////////////
@@ -46,7 +63,12 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
         g_clear_error(&error);
         return NULL;
     }
-    gtk_builder_connect_signals(builder, context);
+    RoomContext *roomContext = g_malloc(sizeof(RoomContext));
+    roomContext->sockfd = context->sockfd;
+    roomContext->room_id = room.room_id;
+    roomContext->home_window = context->home_window;
+
+    gtk_builder_connect_signals(builder, roomContext);
 
     card = GTK_WIDGET(gtk_builder_get_object(builder, "room_card"));
 
@@ -81,11 +103,22 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
 
 void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
 {
-    AppContext *context = (AppContext *)user_data;
+    RoomContext *context = (RoomContext *)user_data;
+
+
+    Room room;
+    
+    int role = handle_join_room(context->sockfd, context->room_id, &room);
+
+    if (role <= 0)
+    {
+        g_printerr("Failed to join room %d\n", context->room_id);
+        return;
+    }
 
     gtk_widget_hide(context->home_window);
+    init_auction_view(context->sockfd, context->home_window, room, role);
 
-    init_auction_view(context->sockfd, context->home_window);
 }
 
 void fetch_all_room(gpointer user_data)
@@ -155,18 +188,14 @@ void on_create_room_ok(GtkWidget *button, gpointer user_data)
     AppContext *context = (AppContext *)user_data;
 
     GtkWidget *form = GTK_WIDGET(context->create_room_form);
-    GtkFlowBox *room_list = GTK_FLOW_BOX(context->room_list);
     const gchar *room_name = gtk_entry_get_text(GTK_ENTRY(context->room_name));
-
-    printf("%s\n", room_name);
 
     int roomId = handle_create_room(context->sockfd, room_name);
     if (roomId > 0)
     {
         gtk_widget_hide(form);
-        GtkWidget *room_card = gtk_button_new_with_label(room_name);
-        gtk_flow_box_insert(room_list, room_card, -1);
-        gtk_widget_show(room_card);
+        clear_all_children(context->room_list);
+        fetch_own_room(context);
     }
     else
     {
@@ -184,15 +213,7 @@ void on_create_room_cancel(GtkWidget *button, gpointer user_data)
 
 ////////////////// ////////////////// //////////////////
 
-void clear_all_children(GtkFlowBox *flowbox)
-{
-    GList *children = gtk_container_get_children(GTK_CONTAINER(flowbox));
-    for (GList *iter = children; iter != NULL; iter = iter->next)
-    {
-        gtk_widget_destroy(GTK_WIDGET(iter->data));
-    }
-    g_list_free(children);
-}
+
 
 void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
 {

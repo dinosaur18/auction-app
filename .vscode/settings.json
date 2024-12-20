@@ -8,6 +8,7 @@
         "session_manager.h": "c",
         "home_view.h": "c",
         "server_controller.h": "c",
-        "auction_service.h": "c"
+        "auction_service.h": "c",
+        "room.h": "c"
     }
 }

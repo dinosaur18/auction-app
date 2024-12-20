@@ -10,6 +10,7 @@
 
 #define PORT 8080
 #define MAX_USERS 100
+#define BUFFER_SIZE 100000
 
 int main()
 {
@@ -89,7 +90,7 @@ int main()
                 else
                 {
                     // Xử lý dữ liệu từ client
-                    char buffer[1024];
+                    char buffer[BUFFER_SIZE];
                     int bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 
                     if (bytes_received <= 0)
@@ -144,6 +145,10 @@ int main()
                         {
                             int itemId = atoi(buffer + 1);
                             handleDeleteItem(fd, itemId);
+                            break;
+                        }
+                        case JOIN_ROOM: {
+                            handleJoinRoom(fd, buffer[1]);
                             break;
                         }
                         default:

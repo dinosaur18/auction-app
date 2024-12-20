@@ -1,7 +1,7 @@
 #ifndef USER_H
 #define USER_H
 
-#define MAX_LENGTH 50
+#define MAX_LENGTH 20
 
 typedef struct
 {

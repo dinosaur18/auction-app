@@ -15,14 +15,14 @@ int saveItem(Item item) {
 }
 
 // Lấy thông tin một vật phẩm theo ID
-int getItemById(int itemId, Item *item) {
+int getItemById(int item_id, Item *item) {
     FILE *file = fopen("data/items.dat", "rb");
     if (file == NULL) {
         return -1;
     }
 
     while (fread(item, sizeof(Item), 1, file)) {
-        if (item->itemId == itemId) {
+        if (item->item_id == item_id) {
             fclose(file);
             return 1;
         }
@@ -31,37 +31,37 @@ int getItemById(int itemId, Item *item) {
     return 0; // Không tìm thấy
 }
 
-// Liệt kê các vật phẩm trong phòng đấu giá
-int listItems(int roomId, Item *items, int maxItems) {
+// Lấy các vật phẩm trong phòng đấu giá
+int loadItems(int room_id, Item *items) {
     FILE *file = fopen("data/items.dat", "rb");
     if (file == NULL) {
         return 0;
     }
 
     int count = 0;
-    while (fread(&items[count], sizeof(Item), 1, file)) {
-        // Giả sử Item có trường roomId để phân loại vật phẩm trong các phòng đấu giá
-        if (items[count].roomId == roomId) {
-            count++;
-            if (count >= maxItems) {
-                break;
+    Item existedItem;
+        while (fread(&existedItem, sizeof(Item), 1, file))
+        {
+            if (existedItem.room_id == room_id)
+            {
+                memcpy(&items[count], &existedItem, sizeof(Item));
+                count++;
             }
         }
-    }
 
     fclose(file);
     return count;
 }
 
 // Xóa vật phẩm theo ID
-int deleteItem(int itemId) {
+int deleteItem(int item_id) {
     FILE *file = fopen("data/items.dat", "rb");
     if (file == NULL) {
         return -1;
     }
 
     // Đọc tất cả vật phẩm vào bộ nhớ
-    Item items[100]; // Giới hạn 100 vật phẩm
+    Item items[100]; 
     int count = 0;
     while (fread(&items[count], sizeof(Item), 1, file)) {
         count++;
@@ -77,7 +77,7 @@ int deleteItem(int itemId) {
 
     // Ghi lại tất cả vật phẩm trừ vật phẩm cần xóa
     for (int i = 0; i < count; i++) {
-        if (items[i].itemId != itemId) {
+        if (items[i].item_id != item_id) {
             fwrite(&items[i], sizeof(Item), 1, file);
         }
     }

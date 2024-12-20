@@ -2,6 +2,8 @@
 #include "style_manager.h"
 #include "auction_view.h"
 #include "auction_service.h"
+#include "room.h"
+#include "item.h"
 
 typedef struct
 {
@@ -26,7 +28,7 @@ void on_auction_window_destroy(GtkWidget *widget, gpointer user_data)
 
 ////////////////// ////////////////// //////////////////
 
-void init_auction_view(int sockfd, GtkWidget *home_window)
+void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
 {
     GtkBuilder *builder;
     GtkWidget *window;
@@ -43,11 +45,32 @@ void init_auction_view(int sockfd, GtkWidget *home_window)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_auction"));
     g_signal_connect(window, "destroy", G_CALLBACK(on_auction_window_destroy), home_window);
 
+    GtkWidget *label_room_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_name"));
+    GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));
+    GtkWidget *label_room_joiner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_joiner"));
+    GtkWidget *add_button = GTK_WIDGET(gtk_builder_get_object(builder, "add_button"));
+
+    if (GTK_IS_LABEL(label_room_name))
+    {
+        gtk_label_set_text(GTK_LABEL(label_room_name), room.roomName);
+    }
+    if (GTK_IS_LABEL(label_room_owner))
+    {
+        gtk_label_set_text(GTK_LABEL(label_room_owner), room.username);
+    }
+    if (GTK_IS_LABEL(label_room_joiner))
+    {
+        char joiner_count_text[32];
+        snprintf(joiner_count_text, sizeof(joiner_count_text), "%d", room.numUsers);
+        gtk_label_set_text(GTK_LABEL(label_room_joiner), joiner_count_text);
+    }
+    if (role == 2) {
+        gtk_widget_hide(add_button);
+    }
+
+
     AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
     auctionContext->sockfd = sockfd;
-    // auctionContext->create_item_form = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_form"));
-    // auctionContext->room_name = GTK_WIDGET(gtk_builder_get_object(builder, "room_name"));
-    // auctionContext->create_room_msg = GTK_WIDGET(gtk_builder_get_object(builder, "create_room_msg"));
 
     gtk_builder_connect_signals(builder, auctionContext);
 

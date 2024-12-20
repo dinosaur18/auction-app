@@ -62,8 +62,10 @@ void handle_register(int client_socket, char buffer[BUFFER_SIZE])
     }
 }
 
-void handleCreateRoom(int client_socket, const char *roomName)
+void handleCreateRoom(int client_socket, char buffer[BUFFER_SIZE])
 {
+    char roomName[MAX_LENGTH];
+    memcpy(roomName, &buffer[1], MAX_LENGTH);
     ClientSession *session = find_session_by_socket(client_socket);
 
     if (session != NULL)
@@ -135,12 +137,12 @@ void handleFetchOwnRoom(int client_socket)
 }
 
 // Hàm xóa phòng đấu giá
-void handleDeleteRoom(int sockfd, int roomId)
+void handleDeleteRoom(int sockfd, int room_id)
 {
     // Xử lý việc xóa phòng
-    if (roomId >= 0)
+    if (room_id >= 0)
     {
-        deleteRoom(roomId); // Gọi hàm deleteRoom để xóa phòng
+        deleteRoom(room_id); // Gọi hàm deleteRoom để xóa phòng
         send(sockfd, "The auction room has been deleted.", 28, 0);
     }
     else
@@ -154,7 +156,7 @@ void handleCreateItem(int sockfd, const char *itemData)
 {
     // Giả sử itemData chứa thông tin vật phẩm dưới dạng chuỗi, cần phân tích để tạo Item
     Item newItem;
-    sscanf(itemData, "%d %s %d %d %d", &newItem.itemId, newItem.name, &newItem.startingPrice, &newItem.buyNowPrice, &newItem.auctionTime);
+    sscanf(itemData, "%d %s %d %d %d", &newItem.item_id, newItem.name, &newItem.startingPrice, &newItem.buyNowPrice, &newItem.auctionTime);
 
     if (saveItem(newItem) > 0)
     {
@@ -166,32 +168,69 @@ void handleCreateItem(int sockfd, const char *itemData)
     }
 }
 
-// Hàm xử lý liệt kê các vật phẩm trong phòng
-// void handleListItems(int sockfd, int roomId) {
-//     Item items[10];  // Giới hạn 10 vật phẩm trong một lần yêu cầu
-//     int count = listItems(roomId, items, 10);
-
-//     if (count > 0) {
-//         for (int i = 0; i < count; i++) {
-//             char buffer[200];
-//             sprintf(buffer, "ID: %d, Tên: %s, Giá khởi điểm: %d, Giá bán ngay: %d, Thời gian: %d\n",
-//                     items[i].itemId, items[i].name, items[i].startingPrice, items[i].buyNowPrice, items[i].auctionTime);
-//             send(sockfd, buffer, strlen(buffer), 0);
-//         }
-//     } else {
-//         send(sockfd, "Không có vật phẩm nào trong phòng đấu giá.", 40, 0);
-//     }
-// }
-
 // Hàm xử lý xóa vật phẩm
-void handleDeleteItem(int sockfd, int itemId)
+void handleDeleteItem(int sockfd, int item_id)
 {
-    if (deleteItem(itemId) > 0)
+    if (deleteItem(item_id) > 0)
     {
         send(sockfd, "The item has been successfully deleted.", 30, 0);
     }
     else
     {
         send(sockfd, "Error deleting item.", 20, 0);
+    }
+}
+
+void handleJoinRoom(int client_socket, int room_id)
+{
+
+    char buffer[BUFFER_SIZE];
+    ClientSession *session = find_session_by_socket(client_socket);
+    Room room;
+    int result = getRoomById(room_id, &room);
+    printf("%d %s \n", room.room_id, session->username);
+
+    if (result == 0 || session == NULL)
+    {
+        int response = 0; // Error
+        send(client_socket, &response, 1, 0);
+        return;
+    }
+
+    // Kiểm tra user
+    int role = 2;
+    if (strcmp(room.username, session->username) == 0)
+    {
+        role = 1; // Owner
+    }
+    else
+    {
+        role = 2; // Joiner
+    }
+
+    // Đóng gói dữ liệu
+    memcpy(&buffer[0], &role, 1);
+    memcpy(&buffer[1], &room, sizeof(Room));
+
+    // Gửi dữ liệu cho client
+    if (send(client_socket, buffer, sizeof(Room) + 1, 0) < 0)
+    {
+        perror("Error sending room data");
+        return;
+    }
+}
+
+void handleFetchItems(int client_socket, int room_id) {
+    char buffer[BUFFER_SIZE];
+    Item items[MAX_ITEM_IN_ROOM];
+    int item_count = loadItems(room_id, items);
+
+    memcpy(&buffer[0], &item_count, 1);
+    memcpy(&buffer[1], &items, item_count * sizeof(Item));
+
+    if (send(client_socket, buffer, (item_count * sizeof(Item)) + 1, 0) < 0)
+    {
+        perror("Error sending room data");
+        return;
     }
 }
