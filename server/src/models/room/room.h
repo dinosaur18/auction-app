@@ -25,6 +25,7 @@ int getNextRoomId();
 int createRoom(const char *roomName, const char *username);
 int deleteRoom(int room_id);
 int loadRooms(Room *rooms, const char *username);
+int updateRoomById(int room_id, const char *newRoomName, int newNumUsers, int newNumItems);
 int getRoomById(int room_id, Room *room);
 
 #endif // ROOM_H

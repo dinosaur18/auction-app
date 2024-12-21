@@ -68,11 +68,12 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
     }
 
     // Tìm và cập nhật nội dung trong card
-    GtkWidget *label_item_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_item_name"));
+    GtkWidget *item_name = GTK_WIDGET(gtk_builder_get_object(builder, "item_name"));
 
-    if (GTK_IS_LABEL(label_item_name))
+    if (GTK_IS_LABEL(item_name))
     {
-        gtk_label_set_text(GTK_LABEL(label_item_name), item.name);
+        g_print("abc");
+        gtk_label_set_text(GTK_LABEL(item_name), item.name);
     }
 
     return card;
@@ -85,18 +86,18 @@ void fetch_item(gpointer user_data)
 
     // Tạo mảng Item để lưu danh sách item nhận được
     Item items[MAX_ITEM];
-    int item_count = handle_fetch_items(context->sockfd,context-> room_id, items);
+    int count = handle_fetch_items(context->sockfd,context-> room_id, items);
 
-    if (item_count < 0)
+    if (count < 0)
     {
         g_printerr("Failed to fetch item list from server\n");
         return;
     }
 
     // Duyệt qua danh sách item và thêm vào GTK_LIST_BOX
-    for (int i = 0; i < item_count; i++)
+    for (int i = 0; i < count; i++)
     {
-
+        g_print ("abc");
         GtkWidget *item_card = add_item_card(items[i], context); 
         gtk_list_box_insert(context->item_list, item_card, -1);
     }
@@ -142,6 +143,7 @@ void on_add_item_ok(GtkWidget *button, gpointer user_data)
     {
         gtk_label_set_text(GTK_LABEL(context->add_item_msg), "This item's name already exists.");
     }
+
 }
 
 
@@ -218,6 +220,7 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
     if (role == 2) {
         gtk_widget_hide(add_button);
     }
+    fetch_item(auctionContext);
 
     g_object_unref(builder);
 }

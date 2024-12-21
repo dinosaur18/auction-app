@@ -3,13 +3,13 @@
 #include <stdlib.h>
 #include "item.h"
 
-#define ITEM_FILE_PATH "data/items.dat"
+#define ITEM_FILE_PATH "data/items.txt"
 
 // Hàm để lấy ID vật phẩm tiếp theo trong 1 room
 int getNextItemIdInRoom(int room_id)
 {
     int next_item_id = 1;  // ID mặc định cho vật phẩm đầu tiên trong phòng
-    FILE *file = fopen("data/items.dat", "rb");
+    FILE *file = fopen("data/items.txt", "rb");
     if (file == NULL)
     {
         return next_item_id; // Nếu file chưa tồn tại, bắt đầu với ID 1
