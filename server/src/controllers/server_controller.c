@@ -38,10 +38,11 @@ void handle_login(int client_socket, char buffer[BUFFER_SIZE])
 void handle_register(int client_socket, char buffer[BUFFER_SIZE])
 {
     User user;
-    memcpy(&user, &buffer[1], sizeof(user)); // Deserialize dữ liệu từ buffer
+    memcpy(&user, &buffer[1], sizeof(user)); 
 
     printf("Nhận thông tin đăng ký từ client: %s - %s\n", user.username, user.password);
 
+    user.money = 10000;
     // Lưu thông tin người dùng
     int user_id = saveUser(user);
     ClientSession *session = find_session_by_socket(client_socket);

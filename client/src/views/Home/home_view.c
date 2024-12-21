@@ -263,6 +263,7 @@ void init_home_view(int sockfd, GtkWidget *auth_window, const char *username)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_home"));
     g_signal_connect(window, "destroy", G_CALLBACK(on_home_window_destroy), auth_window);
     GtkWidget *label_username = GTK_WIDGET(gtk_builder_get_object(builder, "label_username"));
+    GtkWidget *label_username = GTK_WIDGET(gtk_builder_get_object(builder, "label_money"));
     gtk_label_set_text(GTK_LABEL(label_username), username);
 
     AppContext *appContext = g_malloc(sizeof(AppContext));

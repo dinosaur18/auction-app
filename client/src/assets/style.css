@@ -40,6 +40,29 @@ button:focus {
 
 .bg_primary {
     background-color: #013243;
+    padding: 20px;
+}
+
+.bg_primary_10 {
+    background-color: #013243;
+    padding: 10px;
+}
+
+
+.bg_secondary {
+    background-color: #214B5A;
+    padding: 20px;
+}
+
+.bg_light {
+    background-color: #F8F9FC;
+    padding: 20px;
+}
+
+.bg_white {
+    background-color: #fff;
+    padding: 10px;
+    border-top: solid 5px #02E079;
 }
 
 .custom_form {

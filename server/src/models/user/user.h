@@ -6,6 +6,7 @@
 typedef struct
 {
     int userId;
+    int money;
     char username[MAX_LENGTH];
     char password[MAX_LENGTH];
 } User;

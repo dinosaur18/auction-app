@@ -199,14 +199,13 @@
   <object class="GtkWindow" id="window_auction">
     <property name="can-focus">False</property>
     <property name="title">Window with ListBox and Buttons</property>
-    <property name="default-width">1280</property>
+    <property name="default-width">1000</property>
     <property name="default-height">720</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">10</property>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -263,6 +262,7 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="halign">center</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
@@ -270,6 +270,7 @@
                         <property name="label" translatable="yes">Owner - </property>
                         <style>
                           <class name="text_color_white"/>
+                          <class name="text_bold"/>
                         </style>
                       </object>
                       <packing>
@@ -284,6 +285,7 @@
                         <property name="can-focus">False</property>
                         <style>
                           <class name="text_color_white"/>
+                          <class name="text_bold"/>
                         </style>
                       </object>
                       <packing>
@@ -303,6 +305,7 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
+                    <property name="halign">center</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
@@ -310,6 +313,7 @@
                         <property name="label" translatable="yes">Joiner </property>
                         <style>
                           <class name="text_color_white"/>
+                          <class name="text_bold"/>
                         </style>
                       </object>
                       <packing>
@@ -339,6 +343,7 @@
                         <property name="can-focus">False</property>
                         <style>
                           <class name="text_color_white"/>
+                          <class name="text_bold"/>
                         </style>
                       </object>
                       <packing>
@@ -396,11 +401,16 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
+                <property name="spacing">20</property>
                 <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">List Items</property>
+                    <style>
+                      <class name="text_h2"/>
+                      <class name="text_color_white"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -423,15 +433,16 @@
                   <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="margin-left">10</property>
-                    <property name="margin-right">10</property>
-                    <property name="spacing">10</property>
+                    <property name="spacing">20</property>
                     <child>
                       <object class="GtkButton" id="add_button">
                         <property name="label" translatable="yes">Add item</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <style>
+                          <class name="custom_button"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -440,11 +451,15 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="start_button">
                         <property name="label" translatable="yes">Start Auction</property>
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <property name="receives-default">True</property>
+                        <signal name="clicked" handler="on_btn_start_clicked" swapped="no"/>
+                        <style>
+                          <class name="custom_button"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -456,10 +471,12 @@
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="padding">10</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="bg_secondary"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -477,6 +494,10 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label" translatable="yes">Auction</property>
+                    <style>
+                      <class name="text_h2"/>
+                      <class name="bg_light"/>
+                    </style>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -485,11 +506,62 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkStack">
+                  <object class="GtkStack" id="auction_stack">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkBox" id="started">
+                      <object class="GtkBox" id="waiting">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="GtkLabel" id="label_waiting">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">The auction has not started yet.</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="label_countdown">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <style>
+                          <class name="bg_light"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="name">waiting</property>
+                        <property name="title" translatable="yes">page1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="opening">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="orientation">vertical</property>
@@ -595,13 +667,12 @@
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkProgressBar" id="countdown_progress">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">time</property>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
+                                <property name="expand">False</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
@@ -617,9 +688,99 @@
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="orientation">vertical</property>
+                            <property name="halign">center</property>
+                            <property name="spacing">20</property>
                             <child>
-                              <placeholder/>
+                              <object class="GtkBox">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">Start Price</property>
+                                    <style>
+                                      <class name="bg_primary_10"/>
+                                      <class name="text_color_white"/>
+                                      <class name="text_bold"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="start_price">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">label</property>
+                                    <style>
+                                      <class name="bg_white"/>
+                                      <class name="text_bold"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="width-request">150</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">Current Price</property>
+                                    <style>
+                                      <class name="bg_primary_10"/>
+                                      <class name="text_color_white"/>
+                                      <class name="text_bold"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="current_price">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">label</property>
+                                    <style>
+                                      <class name="bg_white"/>
+                                      <class name="text_bold"/>
+                                    </style>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">1</property>
+                              </packing>
                             </child>
                           </object>
                           <packing>
@@ -642,6 +803,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <style>
+                                  <class name="custom_button"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -655,6 +819,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <style>
+                                  <class name="custom_button"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -668,6 +835,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <style>
+                                  <class name="custom_button"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -681,6 +851,9 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <style>
+                                  <class name="custom_button"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -692,33 +865,17 @@
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
+                            <property name="pack-type">end</property>
                             <property name="position">6</property>
                           </packing>
                         </child>
+                        <style>
+                          <class name="bg_light"/>
+                        </style>
                       </object>
                       <packing>
-                        <property name="name">page0</property>
+                        <property name="name">opening</property>
                         <property name="title" translatable="yes">page0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="default">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                        <child>
-                          <placeholder/>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="name">page1</property>
-                        <property name="title" translatable="yes">page1</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
