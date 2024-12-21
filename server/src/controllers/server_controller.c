@@ -230,12 +230,20 @@ void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]) {
 
 
 void handleDeleteItem(int sockfd, int item_id) {
-    if (deleteItem(item_id) > 0) {
-        char response[] = "The item has been successfully deleted.";
-        send(sockfd, response, strlen(response), 0);
+    int result = deleteItem(item_id);
+
+    char response[256]; 
+
+    if (result == 1) {
+        snprintf(response, sizeof(response), "Item with ID %d has been deleted.", item_id);
     } else {
-        char response[] = "Error deleting item.";
-        send(sockfd, response, strlen(response), 0);
+        snprintf(response, sizeof(response), "Failed to delete item with ID %d.", item_id);
+    }
+
+    // Gửi phản hồi đến client
+    if (send(sockfd, response, strlen(response) + 1, 0) < 0) {
+        perror("Failed to send response to client");
     }
 }
+
 

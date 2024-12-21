@@ -103,6 +103,9 @@ int handle_delete_item(int sockfd, int itemId)
     buffer[0] = DELETE_ITEM;
     memcpy(&buffer[1], &itemId, sizeof(itemId));
 
+    // debug
+    printf("item ID to delete: %d\n", itemId);
+
     // Gửi dữ liệu qua socket
     if (send(sockfd, buffer, sizeof(itemId) + 1, 0) < 0)
     {

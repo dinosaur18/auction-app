@@ -9,6 +9,7 @@ typedef struct
 {
     int sockfd;
     int room_id;
+    int item_id;
 
     GtkWidget *add_item_form;
     GtkWidget *item_name;
@@ -21,6 +22,12 @@ typedef struct
     GtkListBox *item_list;
 
 } AuctionContext;
+
+typedef struct
+{
+    int sockfd;
+    int item_id;
+} ItemContext;
 
 void on_auction_window_destroy(GtkWidget *widget, gpointer user_data)
 {
@@ -40,7 +47,6 @@ void clear_item_children(GtkListBox *listbox)
     g_list_free(children);
 }
 
-////////////////// AUCTION PAGE //////////////////
 GtkWidget *add_item_card(Item item, gpointer user_data)
 {
     // AuctionContext *context = (AuctionContext *)user_data;
@@ -57,7 +63,8 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
         return NULL;
     }
 
-    gtk_builder_connect_signals(builder, NULL);
+    // gtk_builder_connect_signals(builder, &item);
+    gtk_builder_connect_signals(builder, (AuctionContext *)user_data);
 
     card = GTK_WIDGET(gtk_builder_get_object(builder, "item_card"));
 
@@ -72,14 +79,12 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
 
     if (GTK_IS_LABEL(item_name))
     {
-        g_print("abc");
         gtk_label_set_text(GTK_LABEL(item_name), item.name);
     }
 
     return card;
 }
 
-////////////////// LIST ITEM /////////////////
 void fetch_item(gpointer user_data)
 {
     AuctionContext *context = (AuctionContext *)user_data;
@@ -97,7 +102,6 @@ void fetch_item(gpointer user_data)
     // Duyệt qua danh sách item và thêm vào GTK_LIST_BOX
     for (int i = 0; i < count; i++)
     {
-        g_print ("abc");
         GtkWidget *item_card = add_item_card(items[i], context); 
         gtk_list_box_insert(context->item_list, item_card, -1);
     }
@@ -106,6 +110,23 @@ void fetch_item(gpointer user_data)
     gtk_widget_show_all(GTK_WIDGET(context->item_list));
 }
 
+void on_delete_item(GtkWidget *button, gpointer user_data)
+{
+    // Item *item = (Item *)user_data;
+    AuctionContext *context = (AuctionContext *)user_data;
+    g_print("Delete button clicked\n");
+
+    int result = handle_delete_item(context->sockfd,context-> item_id); 
+
+    if (result > 0)
+    {
+        // Nếu xóa thành công, cập nhật lại danh sách item
+        clear_item_children(GTK_LIST_BOX(context->item_list));
+        fetch_item(context);
+    }
+}
+
+////////////////// LIST ITEM /////////////////
 void show_add_item_form(GtkWidget *button, gpointer user_data)
 {
     AuctionContext *context = (AuctionContext *)user_data;
@@ -212,7 +233,6 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
     auctionContext->add_item_msg = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_msg"));
 
 
-
     gtk_builder_connect_signals(builder, auctionContext);
 
     apply_css();
@@ -224,8 +244,3 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
 
     g_object_unref(builder);
 }
-
-
-
-
-

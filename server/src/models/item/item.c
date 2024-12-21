@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "item.h"
 
-#define ITEM_FILE_PATH "data/items.txt"
+// #define "data/items.txt" "data/items.txt"
 
 // Hàm để lấy ID vật phẩm tiếp theo trong 1 room
 int getNextItemIdInRoom(int room_id)
@@ -43,7 +43,7 @@ int createItem(int item_id, const char *name, int startingPrice, int buyNowPrice
     item.room_id = room_id;
 
     // Lưu vật phẩm vào file
-    FILE *file = fopen(ITEM_FILE_PATH, "ab");
+    FILE *file = fopen("data/items.txt", "ab");
     if (file == NULL) {
         perror("Error opening file to save item");
         return -1;
@@ -56,22 +56,31 @@ int createItem(int item_id, const char *name, int startingPrice, int buyNowPrice
 
 // Xóa vật phẩm theo ID
 int deleteItem(int item_id) {
-    FILE *file = fopen(ITEM_FILE_PATH, "rb");
+    FILE *file = fopen("data/items.txt", "rb");
     if (file == NULL) {
         perror("Error opening file to delete item");
-        return -1;
+        return -1; // Trả về lỗi nếu không mở được file
     }
 
     Item items[MAX_ITEM];
     int count = 0;
 
+    // Đọc tất cả các item vào mảng
     while (fread(&items[count], sizeof(Item), 1, file)) {
         count++;
     }
 
-    fclose(file);
+    // Kiểm tra nếu không đọc được dữ liệu từ file
+    if (ferror(file)) {
+        perror("Error reading file");
+        fclose(file); // Đảm bảo đóng file khi có lỗi
+        return -1;
+    }
 
-    file = fopen(ITEM_FILE_PATH, "wb");
+    fclose(file); // Đóng file sau khi đọc
+
+
+    file = fopen("data/items.txt", "wb");
     if (file == NULL) {
         perror("Error reopening file to rewrite items");
         return -1;
@@ -80,24 +89,37 @@ int deleteItem(int item_id) {
     int deleted = 0;
     for (int i = 0; i < count; i++) {
         if (items[i].item_id != item_id) {
-            fwrite(&items[i], sizeof(Item), 1, file);
+            if (fwrite(&items[i], sizeof(Item), 1, file) != 1) {
+                perror("Error writing item to file");
+                fclose(file); 
+                return -1; 
+            }
         } else {
-            deleted = 1;
+            deleted = 1;  // Đánh dấu đã xóa thành công
         }
     }
 
-    fclose(file);
-    return deleted ? 1 : 0; // Trả về 1 nếu xóa thành công, 0 nếu không tìm thấy
+    // Đảm bảo đóng file sau khi ghi
+    if (fclose(file) != 0) {
+        perror("Error closing file");
+        return -1; // Lỗi khi đóng file
+    }
+
+    // debug
+    printf("Deleted: %d\n", deleted);
+
+    return deleted ? 1 : 0;
 }
+
 
 // Hàm khởi tạo file nếu chưa tồn tại
 void initItemFile() {
-    FILE *file = fopen(ITEM_FILE_PATH, "rb");
+    FILE *file = fopen("data/items.txt", "rb");
     if (file == NULL) {
-        file = fopen(ITEM_FILE_PATH, "wb");
+        file = fopen("data/items.txt", "wb");
         if (file) {
             fclose(file);
-            printf("Initialized item file at %s\n", ITEM_FILE_PATH);
+            printf("Initialized item file at %s\n","data/items.txt");
         } else {
             perror("Error initializing item file");
         }
@@ -108,7 +130,7 @@ void initItemFile() {
 
 // Lấy các vật phẩm trong một phòng đấu giá
 int loadItems(int room_id, Item *items) {
-    FILE *file = fopen(ITEM_FILE_PATH, "rb");
+    FILE *file = fopen("data/items.txt", "rb");
     if (file == NULL) {
         perror("Error opening file to load items");
         return 0;
@@ -121,6 +143,9 @@ int loadItems(int room_id, Item *items) {
         if (existedItem.room_id == room_id) {
             memcpy(&items[count], &existedItem, sizeof(Item));
             count++;
+
+            // debug
+            printf("[LOAD] item id: %d\n", items[count].item_id);
 
             // Đảm bảo không vượt quá giới hạn
             if (count >= MAX_ITEM_IN_ROOM) {
@@ -135,7 +160,7 @@ int loadItems(int room_id, Item *items) {
 
 // Lấy thông tin một vật phẩm theo ID
 int getItemById(int item_id, Item *item) {
-    FILE *file = fopen(ITEM_FILE_PATH, "rb");
+    FILE *file = fopen("data/items.txt", "rb");
     if (file == NULL) {
         perror("Error opening file to get item by ID");
         return -1;

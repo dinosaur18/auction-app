@@ -144,6 +144,8 @@ int main()
                         case DELETE_ITEM:
                         {
                             int item_id = atoi(buffer + 1);
+                            // debug
+                            printf("item ID to delete: %d\n", item_id);
                             handleDeleteItem(fd, item_id);
                             break;
                         }
