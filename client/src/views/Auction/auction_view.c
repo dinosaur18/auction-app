@@ -1,6 +1,8 @@
 #include <gtk/gtk.h>
+#include <sys/socket.h>
 #include "style_manager.h"
 #include "auction_view.h"
+#include "home_view.h"
 #include "auction_service.h"
 #include "room.h"
 #include "item.h"
@@ -11,7 +13,10 @@ gboolean is_running = FALSE; // Trạng thái đồng hồ
 typedef struct
 {
     int sockfd;
+    AppContext *app_context;
     int role;
+    GtkWidget *label_room_joiner;
+    GtkWidget *auction_window;
     GtkStack *auction_stack;
     GtkStack *label_waiting;
     GtkStack *label_countdown;
@@ -94,7 +99,7 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
     GtkWidget *buy_button = GTK_WIDGET(gtk_builder_get_object(builder, "buy_button"));
     GtkWidget *delete_button = GTK_WIDGET(gtk_builder_get_object(builder, "delete_button"));
 
-        if (GTK_IS_LABEL(item_name))
+    if (GTK_IS_LABEL(item_name))
     {
         gtk_label_set_text(GTK_LABEL(item_name), item.item_name);
     }
@@ -237,12 +242,77 @@ void on_btn_start_clicked(GtkWidget *button, gpointer user_data)
     }
 }
 
+void reload_auction_view(gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+
+    // Cập nhập số người tham gia phòng
+    if (GTK_IS_LABEL(context->label_room_joiner))
+    {
+        Room room;
+
+        int role = handle_join_room(context->sockfd, context->room_id, &room);
+
+        if (role <= 0)
+        {
+            g_printerr("Failed to update room's joiner");
+            return;
+        }
+        char joiner_count_text[32];
+        snprintf(joiner_count_text, sizeof(joiner_count_text), "%d", room.numUsers);
+        gtk_label_set_text(GTK_LABEL(context->label_room_joiner), joiner_count_text);
+    }
+    // Xóa nội dung cũ
+    clear_item_children(context->item_list);
+
+    // Nạp lại dữ liệu
+    fetch_item(context);
+}
+
+gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+
+    if (gtk_widget_get_visible(context->auction_window))
+    {
+        if (condition & G_IO_IN) // Có dữ liệu từ server
+        {
+            int sockfd = g_io_channel_unix_get_fd(source);
+            char buffer[BUFFER_SIZE];
+            memset(buffer, 0, BUFFER_SIZE);
+
+            int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+            if (bytes_received <= 0)
+            {
+                printf("Server disconnected.\n");
+                return FALSE; // Dừng theo dõi socket
+            }
+
+            // Xử lý thông điệp từ server
+            char message_type = buffer[0]; // Loại thông điệp
+            switch (message_type)
+            {
+            case -1:
+                printf("Server yêu cầu refresh dữ liệu.\n");
+                reload_auction_view(context);
+                reload_home_view(context->app_context);
+                break;
+            default:
+                printf("Received unknown message type: %d\n", message_type);
+                break;
+            }
+        }
+    }
+    return TRUE; // Tiếp tục theo dõi socket
+}
+
 ////////////////// ////////////////// //////////////////
 
-void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
+void init_auction_view(int sockfd, AppContext *app_context, Room room, int role)
 {
     AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
     auctionContext->sockfd = sockfd;
+    auctionContext->app_context = app_context;
     auctionContext->role = role;
 
     GtkBuilder *builder;
@@ -258,13 +328,13 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
     }
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_auction"));
-    g_signal_connect(window, "destroy", G_CALLBACK(on_auction_window_destroy), home_window);
+    g_signal_connect(window, "destroy", G_CALLBACK(on_auction_window_destroy), app_context->home_window);
 
     GtkWidget *label_room_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_name"));
     GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));
-    GtkWidget *label_room_joiner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_joiner"));
     GtkWidget *add_button = GTK_WIDGET(gtk_builder_get_object(builder, "add_button"));
     GtkWidget *start_button = GTK_WIDGET(gtk_builder_get_object(builder, "start_button"));
+    auctionContext->label_room_joiner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_joiner"));
     auctionContext->auction_stack = GTK_STACK(gtk_builder_get_object(builder, "auction_stack"));
     auctionContext->label_waiting = GTK_STACK(gtk_builder_get_object(builder, "label_waiting"));
     auctionContext->label_countdown = GTK_STACK(gtk_builder_get_object(builder, "label_countdown"));
@@ -277,15 +347,15 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
     {
         gtk_label_set_text(GTK_LABEL(label_room_owner), room.username);
     }
-    if (GTK_IS_LABEL(label_room_joiner))
+    if (GTK_IS_LABEL(auctionContext->label_room_joiner))
     {
         char joiner_count_text[32];
         snprintf(joiner_count_text, sizeof(joiner_count_text), "%d", room.numUsers);
-        gtk_label_set_text(GTK_LABEL(label_room_joiner), joiner_count_text);
+        gtk_label_set_text(GTK_LABEL(auctionContext->label_room_joiner), joiner_count_text);
     }
 
     auctionContext->room_id = room.room_id;
-    printf("%d\n", room.room_id);
+    auctionContext->auction_window = window;
 
     auctionContext->item_list = GTK_LIST_BOX(gtk_builder_get_object(builder, "item_list"));
     auctionContext->item_name = GTK_WIDGET(gtk_builder_get_object(builder, "item_name"));
@@ -308,6 +378,10 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
     }
 
     fetch_item(auctionContext);
+
+    // Thêm watcher cho socket
+    GIOChannel *io_channel = g_io_channel_unix_new(sockfd);
+    g_io_add_watch(io_channel, G_IO_IN, on_socket_event_auction, auctionContext);
 
     g_object_unref(builder);
 }

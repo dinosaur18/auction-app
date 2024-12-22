@@ -9,6 +9,8 @@
         "home_view.h": "c",
         "server_controller.h": "c",
         "auction_service.h": "c",
-        "room.h": "c"
+        "room.h": "c",
+        "auction_view.h": "c",
+        "item.h": "c"
     }
 }

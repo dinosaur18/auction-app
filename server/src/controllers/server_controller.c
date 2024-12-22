@@ -211,6 +211,15 @@ void handleJoinRoom(int client_socket, int room_id)
     else
     {
         role = 2; // Joiner
+        int updateJoiner = room.numUsers + 1;
+        int res = updateRoomById(room_id, updateJoiner, "joiner");
+        printf("Update Joiner Room %d - %d\n", res, updateJoiner);
+        if (res <= 0)
+        {
+            int response = 0; // Thất bại
+            send(client_socket, &response, 1, 0);
+            return;
+        }
     }
 
     // Đóng gói dữ liệu
@@ -238,8 +247,24 @@ void handleCreateItem(int client_socket, char buffer[BUFFER_SIZE])
     }
     memcpy(&item, &buffer[1], sizeof(Item));
 
-    int response = createItem(item.item_name, item.startingPrice, item.buyNowPrice, item.room_id);
-    send(client_socket, &response, 1, 0);
+    int item_id = createItem(item.item_name, item.startingPrice, item.buyNowPrice, item.room_id);
+    if (item_id > 0)
+    {
+        Room room;
+        if (getRoomById(item.room_id, &room))
+        {
+            int updateItem = room.numItems + 1;
+            int res = updateRoomById(item.room_id, updateItem, "item");
+            printf("Update Item Room %d - %d\n", res, updateItem);
+            if (res <= 0)
+            {
+                int response = 0; // Thất bại
+                send(client_socket, &response, 1, 0);
+                return;
+            }
+        }
+    }
+    send(client_socket, &item_id, 1, 0);
 }
 
 void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE])
@@ -270,6 +295,23 @@ void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE])
     if (result == 1)
     {
         snprintf(response, sizeof(response), "Item with ID %d has been deleted.", item_id);
+        Item item;
+        if (getItemById(item_id, &item))
+        {
+            Room room;
+            if (getRoomById(item.room_id, &room))
+            {
+                int updateItem = room.numItems - 1;
+                int res = updateRoomById(item.room_id, updateItem, "item");
+                printf("Update Item Room %d - %d\n", res, updateItem);
+                if (res <= 0)
+                {
+                    int response = 0; // Thất bại
+                    send(sockfd, &response, 1, 0);
+                    return;
+                }
+            }
+        }
     }
     else
     {

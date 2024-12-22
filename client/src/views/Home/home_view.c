@@ -9,25 +9,8 @@
 typedef struct
 {
     int sockfd;
-    GtkWidget *home_window;
-
-    GtkWidget *dashboard;
-    GtkWidget *room_item;
-    GtkFlowBox *room_list_all;
-
-    GtkWidget *my_auction;
-    GtkWidget *create_room_form;
-    GtkWidget *room_name;
-    GtkWidget *create_room_msg;
-    GtkFlowBox *room_list;
-    GtkWidget *room_card;
-} AppContext;
-
-typedef struct
-{
-    int sockfd;
     int room_id;
-    GtkWidget *home_window;
+    AppContext *app_context;
 } RoomContext;
 
 void on_home_window_destroy(GtkWidget *widget, gpointer user_data)
@@ -68,7 +51,7 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
     RoomContext *roomContext = g_malloc(sizeof(RoomContext));
     roomContext->sockfd = context->sockfd;
     roomContext->room_id = room.room_id;
-    roomContext->home_window = context->home_window;
+    roomContext->app_context = context;
 
     gtk_builder_connect_signals(builder, roomContext);
 
@@ -116,8 +99,8 @@ void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
         return;
     }
 
-    gtk_widget_hide(context->home_window);
-    init_auction_view(context->sockfd, context->home_window, room, role);
+    gtk_widget_hide(context->app_context->home_window);
+    init_auction_view(context->sockfd, context->app_context, room, role);
 }
 
 void fetch_all_room(gpointer user_data)
@@ -212,13 +195,20 @@ void on_create_room_cancel(GtkWidget *button, gpointer user_data)
 
 ////////////////// ////////////////// //////////////////
 
-void reload_home_view(gpointer user_data) {
+void reload_home_view(gpointer user_data)
+{
     AppContext *context = (AppContext *)user_data;
     // Xóa nội dung cũ
     clear_all_children(context->room_list_all);
 
     // Nạp lại dữ liệu
     fetch_all_room(context);
+
+    if (!gtk_widget_get_visible(context->home_window))
+    {
+        printf("checkkkk\n");
+        gtk_widget_show(context->home_window);
+    }
 }
 
 void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
@@ -251,6 +241,7 @@ void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
 gboolean on_socket_event(GIOChannel *source, GIOCondition condition, gpointer user_data)
 {
     AppContext *context = (AppContext *)user_data;
+
     if (condition & G_IO_IN) // Có dữ liệu từ server
     {
         int sockfd = g_io_channel_unix_get_fd(source);

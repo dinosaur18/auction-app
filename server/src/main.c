@@ -144,20 +144,24 @@ int main()
                         case CREATE_ITEM:
                         {
                             handleCreateItem(fd, buffer);
+                            broadcast_refresh(fd);
                             break;
                         }
                         case FETCH_ITEMS:
                         {
                             handleFetchItems(fd, buffer);
+
                             break;
                         }
                         case DELETE_ITEM:
                         {
                             handleDeleteItem(fd, buffer);
+                            broadcast_refresh(fd);
                             break;
                         }
                         case JOIN_ROOM: {
                             handleJoinRoom(fd, buffer[1]);
+                            broadcast_refresh(fd);
                             break;
                         }
                         default:

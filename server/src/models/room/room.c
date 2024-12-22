@@ -180,49 +180,41 @@ int getRoomById(int room_id, Room *room)
 }
 
 // Hàm cập nhật thông tin phòng đấu giá
-int updateRoomById(int room_id, const char *newRoomName, int newNumUsers, int newNumItems)
+int updateRoomById(int room_id, int number, const char *option)
 {
-    FILE *file = fopen("data/rooms.txt", "r");
-    if (file == NULL)
-    {
-        return 0; // Không thể mở file
-    }
+    Room rooms[MAX_ROOMS]; 
+    int count = loadRooms(rooms, NULL);       
 
-    Room rooms[100];
-    int numRooms = 0;
-    int found = 0;
-
-    Room room;
-    while (fscanf(file, "%d %s %s %d %d\n", &room.room_id, room.roomName, room.username, &room.numUsers, &room.numItems) == 5)
-    {
-        if (room.room_id == room_id)
-        {
-            // Cập nhật thông tin
-            strncpy(room.roomName, newRoomName, sizeof(room.roomName));
-            room.numUsers = newNumUsers;
-            room.numItems = newNumItems;
-            found = 1;
+    // Tìm phòng cần cập nhật
+    int updated = 0;
+    for (int i = 0; i < count; i++) {
+        if (rooms[i].room_id == room_id) {
+            if (strcmp(option, "joiner") == 0) {
+                rooms[i].numUsers = number; // Cập nhật số người tham gia
+            } else if (strcmp(option, "item") == 0) {
+                rooms[i].numItems = number; // Cập nhật số lượng vật phẩm
+            }
+            updated = 1;
+            break;
         }
-        rooms[numRooms++] = room;
-    }
-    fclose(file);
-
-    if (!found)
-    {
-        return 0; // Không tìm thấy phòng để cập nhật
     }
 
-    file = fopen("data/rooms.txt", "w");
-    if (file == NULL)
-    {
-        return 0; // Không thể mở file để ghi lại
+    if (!updated) {
+        // Không tìm thấy phòng cần cập nhật
+        return 0;
     }
 
-    for (int i = 0; i < numRooms; i++)
-    {
+    // Ghi lại dữ liệu đã cập nhật vào file
+    FILE *file = fopen("data/rooms.txt", "w");
+    if (file == NULL) {
+        perror("Error reopening file to save updated room");
+        return 0;
+    }
+
+    for (int i = 0; i < count; i++) {
         fprintf(file, "%d %s %s %d %d\n", rooms[i].room_id, rooms[i].roomName, rooms[i].username, rooms[i].numUsers, rooms[i].numItems);
     }
+    fclose(file); // Đóng file sau khi ghi
 
-    fclose(file);
-    return 1; // Thành công
+    return room_id; // Thành công
 }
