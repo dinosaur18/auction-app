@@ -73,6 +73,7 @@ int deleteItem(int item_id)
     }
 
     int deleted = 0;
+    int room_id = 0;
     for (int i = 0; i < count; i++)
     {
         if (items[i].item_id != item_id)
@@ -83,11 +84,12 @@ int deleteItem(int item_id)
         else
         {
             deleted = 1; // Đánh dấu đã xóa thành công
+            room_id = items[i].room_id;
         }
     }
 
     fclose(file); // Đảm bảo đóng file sau khi ghi
-    return deleted ? 1 : 0;
+    return deleted ? room_id : 0;
 }
 
 // Hàm khởi tạo file nếu chưa tồn tại

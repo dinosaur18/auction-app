@@ -188,7 +188,6 @@ void handleDeleteRoom(int sockfd, char buffer[BUFFER_SIZE])
 
 void handleJoinRoom(int client_socket, int room_id)
 {
-
     char buffer[BUFFER_SIZE];
     ClientSession *session = find_session_by_socket(client_socket);
     Room room;
@@ -230,6 +229,43 @@ void handleJoinRoom(int client_socket, int room_id)
     if (send(client_socket, buffer, sizeof(Room) + 1, 0) < 0)
     {
         perror("Error sending room data");
+        return;
+    }
+}
+
+void handleExitRoom(int client_socket, int room_id)
+{
+    ClientSession *session = find_session_by_socket(client_socket);
+    Room room;
+    int result = getRoomById(room_id, &room);
+
+    if (result == 0 || session == NULL)
+    {
+        int response = 0; // Error
+        send(client_socket, &response, 1, 0);
+        return;
+    }
+
+    // Kiểm tra user
+    int response = 0;
+    if (strcmp(room.username, session->username) != 0)
+    {
+        int updateJoiner = room.numUsers - 1;
+        int res = updateRoomById(room_id, updateJoiner, "joiner");
+        printf("Update Joiner Room %d - %d\n", res, updateJoiner);
+        if (res <= 0)
+        {
+            int response = 0; // Thất bại
+            send(client_socket, &response, 1, 0);
+            return;
+        }
+        response = 1;
+    }
+
+    // Gửi dữ liệu cho client
+    if (send(client_socket, &response, 1, 0) < 0)
+    {
+        perror("Error sending data");
         return;
     }
 }
@@ -288,38 +324,33 @@ void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE])
 void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE])
 {
     int item_id = buffer[1];
-    int result = deleteItem(item_id);
-
-    char response[256];
-
-    if (result == 1)
+    int room_id = deleteItem(item_id);
+    int response = 1;
+    printf("%d\n", room_id);
+    if (room_id > 0)
     {
-        snprintf(response, sizeof(response), "Item with ID %d has been deleted.", item_id);
-        Item item;
-        if (getItemById(item_id, &item))
+        Room room;
+        if (getRoomById(room_id, &room))
         {
-            Room room;
-            if (getRoomById(item.room_id, &room))
+            response = 1;
+            int updateItem = room.numItems - 1;
+            int res = updateRoomById(room_id, updateItem, "item");
+            printf("Update Item Room %d - %d\n", res, updateItem);
+            if (res <= 0)
             {
-                int updateItem = room.numItems - 1;
-                int res = updateRoomById(item.room_id, updateItem, "item");
-                printf("Update Item Room %d - %d\n", res, updateItem);
-                if (res <= 0)
-                {
-                    int response = 0; // Thất bại
-                    send(sockfd, &response, 1, 0);
-                    return;
-                }
+                int response = 0; // Thất bại
+                send(sockfd, &response, 1, 0);
+                return;
             }
         }
     }
     else
     {
-        snprintf(response, sizeof(response), "Failed to delete item with ID %d.", item_id);
+        response = 0;
     }
 
     // Gửi phản hồi đến client
-    if (send(sockfd, response, strlen(response) + 1, 0) < 0)
+    if (send(sockfd, &response, 1, 0) < 0)
     {
         perror("Failed to send response to client");
     }

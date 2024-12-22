@@ -2,7 +2,6 @@
 #include <sys/socket.h>
 #include "style_manager.h"
 #include "auction_view.h"
-#include "home_view.h"
 #include "auction_service.h"
 #include "room.h"
 #include "item.h"
@@ -13,8 +12,8 @@ gboolean is_running = FALSE; // Trạng thái đồng hồ
 typedef struct
 {
     int sockfd;
-    AppContext *app_context;
     int role;
+    GtkWidget *home_window;
     GtkWidget *label_room_joiner;
     GtkWidget *auction_window;
     GtkStack *auction_stack;
@@ -45,10 +44,12 @@ typedef struct
 
 void on_auction_window_destroy(GtkWidget *widget, gpointer user_data)
 {
-    GtkWidget *home_window = (GtkWidget *)user_data;
+    AuctionContext *context = (AuctionContext *)user_data;
 
-    // Hiển thị lại cửa sổ đăng nhập khi cửa sổ Home bị đóng
-    gtk_widget_show(home_window);
+    if (handle_exit_room(context->sockfd, context->room_id))
+    {
+        gtk_widget_show(context->home_window);
+    }
 }
 
 void clear_item_children(GtkListBox *listbox)
@@ -273,7 +274,7 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
 {
     AuctionContext *context = (AuctionContext *)user_data;
 
-    if (gtk_widget_get_visible(context->auction_window))
+    if (context->auction_window && gtk_widget_get_visible(context->auction_window))
     {
         if (condition & G_IO_IN) // Có dữ liệu từ server
         {
@@ -295,7 +296,6 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
             case -1:
                 printf("Server yêu cầu refresh dữ liệu.\n");
                 reload_auction_view(context);
-                reload_home_view(context->app_context);
                 break;
             default:
                 printf("Received unknown message type: %d\n", message_type);
@@ -308,11 +308,11 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
 
 ////////////////// ////////////////// //////////////////
 
-void init_auction_view(int sockfd, AppContext *app_context, Room room, int role)
+void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
 {
     AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
     auctionContext->sockfd = sockfd;
-    auctionContext->app_context = app_context;
+    auctionContext->home_window = home_window;
     auctionContext->role = role;
 
     GtkBuilder *builder;
@@ -328,7 +328,7 @@ void init_auction_view(int sockfd, AppContext *app_context, Room room, int role)
     }
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_auction"));
-    g_signal_connect(window, "destroy", G_CALLBACK(on_auction_window_destroy), app_context->home_window);
+    g_signal_connect(window, "destroy", G_CALLBACK(on_auction_window_destroy), auctionContext);
 
     GtkWidget *label_room_name = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_name"));
     GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));

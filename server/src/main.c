@@ -161,7 +161,12 @@ int main()
                         }
                         case JOIN_ROOM: {
                             handleJoinRoom(fd, buffer[1]);
-                            broadcast_refresh(fd);
+                            // broadcast_refresh(fd);
+                            break;
+                        }
+                        case EXIT_ROOM: {
+                            handleExitRoom(fd, buffer[1]);
+                            // broadcast_refresh(fd);
                             break;
                         }
                         default:

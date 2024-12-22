@@ -10,15 +10,17 @@ typedef enum
     CREATE_ITEM        = 0x05,  // Client Tạo vật phẩm đấu giá
     DELETE_ITEM        = 0x06,  // Client Xóa vật phẩm đấu giá
     JOIN_ROOM          = 0x07,  // Client Tham gia phiên đấu giá
-    FETCH_ALL_ROOMS    = 0x08,  // Client yêu cầu lấy danh sách tất cả các phòng đấu giá hiện có
+    EXIT_ROOM          = 0x08,  // Client Tham gia phiên đấu giá
+    FETCH_ALL_ROOMS    = 0x09,  // Client yêu cầu lấy danh sách tất cả các phòng đấu giá hiện có
     FETCH_OWN_ROOMS    = 0x0A,  // Client yêu cầu lấy danh sách phòng đấu giá đang sở hữu
     FETCH_ITEMS        = 0x0B,  // Client yêu cầu lấy danh sách vật phẩm trong phòng đấu giá
-    BID                = 0x0C,  // Client Gửi giá đấu
-    UPDATE_AUCTION     = 0x0D,  // Server Cập nhật trạng thái phiên đấu giá
-    RESULT             = 0x0E,  // Server gửi kết quả phiên đấu giá
-    NOTIFICATION       = 0x0F,  // Server gửi thông báo phiên đấu giá sắp kết thúc
-    BUY_NOW            = 0x10,  // Client yêu cầu mua vật phẩm với giá bán ngay
-    LOGOUT             = 0x11,  // Client yêu cầu đăng xuất
+    START_AUCTION      = 0x0C,  // Client (Nếu là chủ phòng) gửi yêu cầu bắt đầu phiên đấu giá
+    BID                = 0x0D,  // Client Gửi giá đấu
+    UPDATE_AUCTION     = 0x0E,  // Server Cập nhật trạng thái phiên đấu giá
+    RESULT             = 0x0F,  // Server gửi kết quả phiên đấu giá
+    NOTIFICATION       = 0x10,  // Server gửi thông báo phiên đấu giá sắp kết thúc
+    BUY_NOW            = 0x11,  // Client yêu cầu mua vật phẩm với giá bán ngay
+    LOGOUT             = 0x12,  // Client yêu cầu đăng xuất
     ERROR              = 0x00,  // Server thông báo lỗi
     REFRESH            = -1,  // Server yêu cầu reload
 } MessageType;

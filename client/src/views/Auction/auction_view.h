@@ -6,6 +6,6 @@
 #include "home_view.h"
 
 // Khai báo hàm hoặc cấu trúc
-void init_auction_view(int sockfd, AppContext *app_context, Room room, int role);
+void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role);
 
 #endif

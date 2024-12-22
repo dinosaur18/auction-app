@@ -9,6 +9,7 @@ void handleDeleteRoom(int sockfd, char buffer[BUFFER_SIZE]);
 void handleFetchAllRoom(int client_socket);
 void handleFetchOwnRoom(int client_socket);
 void handleJoinRoom(int client_socket, int room_id);
+void handleExitRoom(int client_socket, int room_id);
 void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]);
 void handleCreateItem(int client_socket, char buffer[BUFFER_SIZE]);
 void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE]);

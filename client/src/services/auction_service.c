@@ -90,7 +90,7 @@ int handle_create_item(int sockfd, const char *item_name, int startingPrice, int
         return -1;
     }
 
-    return buffer[0]; 
+    return buffer[0];
 }
 
 // Client gửi yêu cầu xoá vật phẩm đấu giá
@@ -214,14 +214,14 @@ int handle_join_room(int sockfd, int room_id, Room *room)
     char buffer[BUFFER_SIZE];
 
     // Định dạng thông điệp gửi đi
-    buffer[0] = JOIN_ROOM;                                   
-    buffer[1] = room_id;                    
+    buffer[0] = JOIN_ROOM;
+    buffer[1] = room_id;
 
     // Gửi yêu cầu qua socket
     if (send(sockfd, buffer, 2, 0) < 0)
     {
         perror("Failed to send join room request");
-        return -1; 
+        return -1;
     }
 
     // Nhận danh sách phòng từ server
@@ -235,5 +235,61 @@ int handle_join_room(int sockfd, int room_id, Room *room)
 
     memcpy(room, &buffer[1], sizeof(Room));
 
-    return role; 
+    return role;
+}
+
+int handle_exit_room(int sockfd, int room_id) {
+    char buffer[BUFFER_SIZE];
+
+    // Định dạng thông điệp gửi đi
+    buffer[0] = EXIT_ROOM;
+    buffer[1] = room_id;
+
+    // Gửi yêu cầu qua socket
+    if (send(sockfd, buffer, 2, 0) < 0)
+    {
+        perror("Failed to send exit room request");
+        return -1;
+    }
+
+    // Nhận danh sách phòng từ server
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    {
+        perror("Failed to receive response");
+        return -1;
+    }
+
+    return buffer[0];
+}
+
+int handle_start_auction(int sockfd, int room_id)
+{
+    // char buffer[BUFFER_SIZE];
+    // buffer[0] = START_AUCTION;
+
+    // // Gửi yêu cầu qua socket
+    // if (send(sockfd, buffer, 1, 0) < 0)
+    // {
+    //     perror("Failed to send start auction request");
+    //     return -1;
+    // }
+
+    // // Nhận danh sách phòng từ server
+    // if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    // {
+    //     perror("Failed to receive response");
+    //     return -1;
+    // }
+
+    // int room_count = buffer[0]; // buffer[0] chứa số lượng phòng đấu giá
+
+    // if (room_count <= 0)
+    // {
+    //     printf("No rooms found.\n");
+    //     return 0; // Không có phòng nào
+    // }
+
+    // memcpy(rooms, &buffer[1], room_count * sizeof(Room));
+
+    // return room_count; // Trả về số lượng phòng nhận được
 }

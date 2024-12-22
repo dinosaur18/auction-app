@@ -9,8 +9,24 @@
 typedef struct
 {
     int sockfd;
+    GtkWidget *home_window;
+    GtkWidget *dashboard;
+    GtkWidget *room_item;
+    GtkFlowBox *room_list_all;
+
+    GtkWidget *my_auction;
+    GtkWidget *create_room_form;
+    GtkWidget *room_name;
+    GtkWidget *create_room_msg;
+    GtkFlowBox *room_list;
+    GtkWidget *room_card;
+} AppContext;
+
+typedef struct
+{
+    int sockfd;
     int room_id;
-    AppContext *app_context;
+    GtkWidget *home_window;
 } RoomContext;
 
 void on_home_window_destroy(GtkWidget *widget, gpointer user_data)
@@ -51,7 +67,7 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
     RoomContext *roomContext = g_malloc(sizeof(RoomContext));
     roomContext->sockfd = context->sockfd;
     roomContext->room_id = room.room_id;
-    roomContext->app_context = context;
+    roomContext->home_window = context->home_window;
 
     gtk_builder_connect_signals(builder, roomContext);
 
@@ -99,8 +115,8 @@ void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
         return;
     }
 
-    gtk_widget_hide(context->app_context->home_window);
-    init_auction_view(context->sockfd, context->app_context, room, role);
+    gtk_widget_hide(context->home_window);
+    init_auction_view(context->sockfd, context->home_window, room, role);
 }
 
 void fetch_all_room(gpointer user_data)
@@ -203,12 +219,6 @@ void reload_home_view(gpointer user_data)
 
     // Nạp lại dữ liệu
     fetch_all_room(context);
-
-    if (!gtk_widget_get_visible(context->home_window))
-    {
-        printf("checkkkk\n");
-        gtk_widget_show(context->home_window);
-    }
 }
 
 void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
@@ -242,32 +252,36 @@ gboolean on_socket_event(GIOChannel *source, GIOCondition condition, gpointer us
 {
     AppContext *context = (AppContext *)user_data;
 
-    if (condition & G_IO_IN) // Có dữ liệu từ server
+    if (gtk_widget_get_visible(context->home_window))
     {
-        int sockfd = g_io_channel_unix_get_fd(source);
-        char buffer[BUFFER_SIZE];
-        memset(buffer, 0, BUFFER_SIZE);
-
-        int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
-        if (bytes_received <= 0)
+        if (condition & G_IO_IN) // Có dữ liệu từ server
         {
-            printf("Server disconnected.\n");
-            return FALSE; // Dừng theo dõi socket
-        }
+            int sockfd = g_io_channel_unix_get_fd(source);
+            char buffer[BUFFER_SIZE];
+            memset(buffer, 0, BUFFER_SIZE);
 
-        // Xử lý thông điệp từ server
-        char message_type = buffer[0]; // Loại thông điệp
-        switch (message_type)
-        {
-        case -1:
-            printf("Server yêu cầu refresh dữ liệu.\n");
-            reload_home_view(context);
-            break;
-        default:
-            printf("Received unknown message type: %d\n", message_type);
-            break;
+            int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+            if (bytes_received <= 0)
+            {
+                printf("Server disconnected.\n");
+                return FALSE; // Dừng theo dõi socket
+            }
+
+            // Xử lý thông điệp từ server
+            char message_type = buffer[0]; // Loại thông điệp
+            switch (message_type)
+            {
+            case -1:
+                printf("Server yêu cầu refresh dữ liệu.\n");
+                reload_home_view(context);
+                break;
+            default:
+                printf("Received unknown message type: %d\n", message_type);
+                break;
+            }
         }
     }
+
     return TRUE; // Tiếp tục theo dõi socket
 }
 
