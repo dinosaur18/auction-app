@@ -25,8 +25,25 @@ void handle_login(int client_socket, char buffer[BUFFER_SIZE])
         strncpy(session->username, user.username, sizeof(session->username));
         printf("User %s logged in with user_id %d\n", user.username, user_id);
 
-        int response = 1; // Đăng nhập thành công
-        send(client_socket, &response, 1, 0);
+        User user_data;
+        int result = getUserById(user_id, &user_data);
+        printf("Username: %s, Password: %d\n", user_data.username, user_data.money);
+        if (result == 0)
+        {
+            int response = 0; // Error
+            send(client_socket, &response, 1, 0);
+            return;
+        }
+        // Đóng gói dữ liệu
+        buffer[0] = 1;
+        memcpy(&buffer[1], &user_data, sizeof(User));
+
+        // Gửi dữ liệu cho client
+        if (send(client_socket, buffer, sizeof(User) + 1, 0) < 0)
+        {
+            perror("Error sending room data");
+            return;
+        }
     }
     else
     {
@@ -38,11 +55,10 @@ void handle_login(int client_socket, char buffer[BUFFER_SIZE])
 void handle_register(int client_socket, char buffer[BUFFER_SIZE])
 {
     User user;
-    memcpy(&user, &buffer[1], sizeof(user)); 
+    memcpy(&user, &buffer[1], sizeof(user));
 
     printf("Nhận thông tin đăng ký từ client: %s - %s\n", user.username, user.password);
 
-    user.money = 10000;
     // Lưu thông tin người dùng
     int user_id = saveUser(user);
     ClientSession *session = find_session_by_socket(client_socket);
@@ -53,8 +69,25 @@ void handle_register(int client_socket, char buffer[BUFFER_SIZE])
         strncpy(session->username, user.username, sizeof(session->username));
         printf("User %s register with user_id %d\n", user.username, user_id);
 
-        int response = 1; // Đăng ký thành công
-        send(client_socket, &response, 1, 0);
+        User user_data;
+        int result = getUserById(user_id, &user_data);
+        printf("Username: %s, Password: %d\n", user_data.username, user_data.money);
+        if (result == 0)
+        {
+            int response = 0; // Error
+            send(client_socket, &response, 1, 0);
+            return;
+        }
+        // Đóng gói dữ liệu
+        buffer[0] = 1;
+        memcpy(&buffer[1], &user_data, sizeof(User));
+
+        // Gửi dữ liệu cho client
+        if (send(client_socket, buffer, sizeof(User) + 1, 0) < 0)
+        {
+            perror("Error sending room data");
+            return;
+        }
     }
     else
     {
@@ -138,8 +171,9 @@ void handleFetchOwnRoom(int client_socket)
 }
 
 // Hàm xóa phòng đấu giá
-void handleDeleteRoom(int sockfd, int room_id)
+void handleDeleteRoom(int sockfd, char buffer[BUFFER_SIZE])
 {
+    int room_id = buffer[1];
     // Xử lý việc xóa phòng
     if (room_id >= 0)
     {
@@ -191,28 +225,25 @@ void handleJoinRoom(int client_socket, int room_id)
     }
 }
 
-void handleCreateItem(int sockfd, char buffer[BUFFER_SIZE]) {
+void handleCreateItem(int client_socket, char buffer[BUFFER_SIZE])
+{
     Item item;
 
     // Kiểm tra nếu buffer đủ dữ liệu
-    if (BUFFER_SIZE < sizeof(Item) + 1) {
+    if (BUFFER_SIZE < sizeof(Item) + 1)
+    {
         int response = 0; // Thất bại
-        send(sockfd, &response, sizeof(response), 0);
+        send(client_socket, &response, 1, 0);
         return;
     }
-
     memcpy(&item, &buffer[1], sizeof(Item));
 
-    if (createItem(item.item_id, item.name, item.startingPrice, item.buyNowPrice, item.auctionTime, item.room_id) > 0) {
-        int response = 1; // Thành công
-        send(sockfd, &response, sizeof(response), 0);
-    } else {
-        int response = 0; // Thất bại
-        send(sockfd, &response, sizeof(response), 0);
-    }
+    int response = createItem(item.item_name, item.startingPrice, item.buyNowPrice, item.room_id);
+    send(client_socket, &response, 1, 0);
 }
 
-void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]) {
+void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE])
+{
     int room_id;
     memcpy(&room_id, &buffer[1], sizeof(int)); // Deserialize room_id từ buffer
 
@@ -220,31 +251,34 @@ void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]) {
     int item_count = loadItems(room_id, items);
 
     char send_buffer[BUFFER_SIZE];
-    memcpy(&send_buffer[0], &item_count, sizeof(int));
-    memcpy(&send_buffer[4], items, item_count * sizeof(Item));
+    memcpy(&send_buffer[0], &item_count, 1);
+    memcpy(&send_buffer[1], items, item_count * sizeof(Item));
 
-    if (send(client_socket, send_buffer, sizeof(int) + item_count * sizeof(Item), 0) < 0) {
+    if (send(client_socket, send_buffer, 1 + item_count * sizeof(Item), 0) < 0)
+    {
         perror("Error sending item data");
     }
 }
 
-
-
-void handleDeleteItem(int sockfd, int item_id) {
+void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE])
+{
+    int item_id = buffer[1];
     int result = deleteItem(item_id);
 
-    char response[256]; 
+    char response[256];
 
-    if (result == 1) {
+    if (result == 1)
+    {
         snprintf(response, sizeof(response), "Item with ID %d has been deleted.", item_id);
-    } else {
+    }
+    else
+    {
         snprintf(response, sizeof(response), "Failed to delete item with ID %d.", item_id);
     }
 
     // Gửi phản hồi đến client
-    if (send(sockfd, response, strlen(response) + 1, 0) < 0) {
+    if (send(sockfd, response, strlen(response) + 1, 0) < 0)
+    {
         perror("Failed to send response to client");
     }
 }
-
-

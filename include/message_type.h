@@ -11,7 +11,6 @@ typedef enum
     DELETE_ITEM        = 0x06,  // Client Xóa vật phẩm đấu giá
     JOIN_ROOM          = 0x07,  // Client Tham gia phiên đấu giá
     FETCH_ALL_ROOMS    = 0x08,  // Client yêu cầu lấy danh sách tất cả các phòng đấu giá hiện có
-    FETCH_BIDDING_ITEMS= 0x09,  // Client yêu cầu lấy danh sách tất cả vật phẩm đang được đấu giá
     FETCH_OWN_ROOMS    = 0x0A,  // Client yêu cầu lấy danh sách phòng đấu giá đang sở hữu
     FETCH_ITEMS        = 0x0B,  // Client yêu cầu lấy danh sách vật phẩm trong phòng đấu giá
     BID                = 0x0C,  // Client Gửi giá đấu
@@ -21,6 +20,9 @@ typedef enum
     BUY_NOW            = 0x10,  // Client yêu cầu mua vật phẩm với giá bán ngay
     LOGOUT             = 0x11,  // Client yêu cầu đăng xuất
     ERROR              = 0x00,  // Server thông báo lỗi
+    REFRESH            = -1,  // Server yêu cầu reload
 } MessageType;
+
+void logSystem(const char *agent, const char *logType, const char *format, ...);
 
 #endif

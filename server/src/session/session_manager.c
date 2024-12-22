@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static ClientSession sessions[MAX_CLIENTS];
+ClientSession sessions[MAX_CLIENTS];
 
 void init_sessions() {
     for (int i = 0; i < MAX_CLIENTS; i++) {

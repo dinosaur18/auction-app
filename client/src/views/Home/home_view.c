@@ -1,8 +1,10 @@
 #include <gtk/gtk.h>
+#include <sys/socket.h>
 #include "style_manager.h"
 #include "home_view.h"
 #include "auction_view.h"
 #include "auction_service.h"
+#include "message_type.h"
 
 typedef struct
 {
@@ -104,10 +106,8 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
 void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
 {
     RoomContext *context = (RoomContext *)user_data;
-    Item item;
-
     Room room;
-    
+
     int role = handle_join_room(context->sockfd, context->room_id, &room);
 
     if (role <= 0)
@@ -117,8 +117,7 @@ void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
     }
 
     gtk_widget_hide(context->home_window);
-    init_auction_view(context->sockfd, context->home_window, room, item, role);
-
+    init_auction_view(context->sockfd, context->home_window, room, role);
 }
 
 void fetch_all_room(gpointer user_data)
@@ -139,7 +138,7 @@ void fetch_all_room(gpointer user_data)
     for (int i = 0; i < room_count; i++)
     {
 
-        GtkWidget *room_card = create_room_card(rooms[i], context); 
+        GtkWidget *room_card = create_room_card(rooms[i], context);
         gtk_flow_box_insert(context->room_list_all, room_card, -1);
     }
 
@@ -167,7 +166,7 @@ void fetch_own_room(gpointer user_data)
     for (int i = 0; i < room_count; i++)
     {
 
-        GtkWidget *room_card = create_room_card(rooms[i], context); 
+        GtkWidget *room_card = create_room_card(rooms[i], context);
         gtk_flow_box_insert(context->room_list, room_card, -1);
     }
 
@@ -213,7 +212,14 @@ void on_create_room_cancel(GtkWidget *button, gpointer user_data)
 
 ////////////////// ////////////////// //////////////////
 
+void reload_home_view(gpointer user_data) {
+    AppContext *context = (AppContext *)user_data;
+    // Xóa nội dung cũ
+    clear_all_children(context->room_list_all);
 
+    // Nạp lại dữ liệu
+    fetch_all_room(context);
+}
 
 void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
 {
@@ -227,11 +233,7 @@ void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
     {
         printf("Switched to Dashboard tab.\n");
 
-        // // Xóa các widget hiện có trong flowbox trước khi fetch lại
-        clear_all_children(context->room_list_all);
-
-        // // Fetch lại danh sách tất cả các phòng
-        fetch_all_room(context);
+        reload_home_view(context);
     }
     // Kiểm tra nếu là tab My Auctions
     else if (current_child == GTK_WIDGET(context->my_auction))
@@ -246,7 +248,39 @@ void on_tab_switch(GtkStack *stack, GParamSpec *pspec, gpointer user_data)
     }
 }
 
-void init_home_view(int sockfd, GtkWidget *auth_window, const char *username)
+gboolean on_socket_event(GIOChannel *source, GIOCondition condition, gpointer user_data)
+{
+    AppContext *context = (AppContext *)user_data;
+    if (condition & G_IO_IN) // Có dữ liệu từ server
+    {
+        int sockfd = g_io_channel_unix_get_fd(source);
+        char buffer[BUFFER_SIZE];
+        memset(buffer, 0, BUFFER_SIZE);
+
+        int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+        if (bytes_received <= 0)
+        {
+            printf("Server disconnected.\n");
+            return FALSE; // Dừng theo dõi socket
+        }
+
+        // Xử lý thông điệp từ server
+        char message_type = buffer[0]; // Loại thông điệp
+        switch (message_type)
+        {
+        case -1:
+            printf("Server yêu cầu refresh dữ liệu.\n");
+            reload_home_view(context);
+            break;
+        default:
+            printf("Received unknown message type: %d\n", message_type);
+            break;
+        }
+    }
+    return TRUE; // Tiếp tục theo dõi socket
+}
+
+void init_home_view(int sockfd, GtkWidget *auth_window, User user)
 {
     GtkBuilder *builder;
     GtkWidget *window;
@@ -263,8 +297,12 @@ void init_home_view(int sockfd, GtkWidget *auth_window, const char *username)
     window = GTK_WIDGET(gtk_builder_get_object(builder, "window_home"));
     g_signal_connect(window, "destroy", G_CALLBACK(on_home_window_destroy), auth_window);
     GtkWidget *label_username = GTK_WIDGET(gtk_builder_get_object(builder, "label_username"));
-    GtkWidget *label_username = GTK_WIDGET(gtk_builder_get_object(builder, "label_money"));
-    gtk_label_set_text(GTK_LABEL(label_username), username);
+    GtkWidget *label_money = GTK_WIDGET(gtk_builder_get_object(builder, "label_money"));
+    gtk_label_set_text(GTK_LABEL(label_username), user.username);
+
+    char money_text[32];
+    snprintf(money_text, sizeof(money_text), "%d", user.money);
+    gtk_label_set_text(GTK_LABEL(label_money), money_text);
 
     AppContext *appContext = g_malloc(sizeof(AppContext));
     appContext->sockfd = sockfd;
@@ -287,8 +325,11 @@ void init_home_view(int sockfd, GtkWidget *auth_window, const char *username)
 
     apply_css();
     gtk_widget_show_all(window);
-
     fetch_all_room(appContext);
+
+    // Thêm watcher cho socket
+    GIOChannel *io_channel = g_io_channel_unix_new(sockfd);
+    g_io_add_watch(io_channel, G_IO_IN, on_socket_event, appContext);
 
     g_object_unref(builder);
 }

@@ -5,7 +5,7 @@
 
 typedef struct
 {
-    int userId;
+    int user_id;
     int money;
     char username[MAX_LENGTH];
     char password[MAX_LENGTH];
@@ -15,5 +15,6 @@ typedef struct
 int saveUser(User user);
 int checkUserExists(const char *username);
 int authenticateUser(User user);
+int getUserById(int user_id, User *user);
 
 #endif

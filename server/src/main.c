@@ -12,6 +12,17 @@
 #define MAX_USERS 100
 #define BUFFER_SIZE 100000
 
+void broadcast_refresh(int client_socket) {
+    char buffer[BUFFER_SIZE];
+    printf("hello\n");
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (sessions[i].sockfd > 0 && sessions[i].sockfd != client_socket) { 
+            buffer[0] = REFRESH;
+            send(sessions[i].sockfd, buffer, 1, 0);
+        }
+    }
+}
+
 int main()
 {
     int server_sockfd, client_sockfd;
@@ -114,13 +125,12 @@ int main()
                         case CREATE_ROOM:
                         {
                             handleCreateRoom(fd, buffer);
+                            broadcast_refresh(fd);
                             break;
                         }
                         case DELETE_ROOM:
                         {
-                            // Assuming buffer contains room ID (an integer) starting from index 1
-                            int roomId = atoi(buffer + 1);
-                            handleDeleteRoom(fd, roomId); // Use correct handler for delete room
+                            handleDeleteRoom(fd, buffer); // Use correct handler for delete room
                             break;
                         }
                         case FETCH_ALL_ROOMS: {
@@ -143,10 +153,7 @@ int main()
                         }
                         case DELETE_ITEM:
                         {
-                            int item_id = atoi(buffer + 1);
-                            // debug
-                            printf("item ID to delete: %d\n", item_id);
-                            handleDeleteItem(fd, item_id);
+                            handleDeleteItem(fd, buffer);
                             break;
                         }
                         case JOIN_ROOM: {

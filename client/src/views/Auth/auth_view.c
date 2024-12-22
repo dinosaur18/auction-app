@@ -29,8 +29,9 @@ void on_register_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->register_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->register_password));
 
-    int result = handle_register(context->sockfd, username, password);
-    if (result > 0)
+    User user;
+    int res = handle_register(context->sockfd, username, password, &user);
+    if (res)
     {
         gtk_label_set_text(GTK_LABEL(context->register_message), "Register successful!");
 
@@ -38,7 +39,7 @@ void on_register_button_clicked(GtkWidget *button, gpointer user_data)
         gtk_widget_hide(context->auth_window);
 
         // Chuyển sang giao diện Home
-        init_home_view(context->sockfd, context->auth_window, username);
+        init_home_view(context->sockfd, context->auth_window, user);
     }
     else
     {
@@ -53,9 +54,9 @@ void on_login_button_clicked(GtkWidget *button, gpointer user_data)
     const gchar *username = gtk_entry_get_text(GTK_ENTRY(context->login_username));
     const gchar *password = gtk_entry_get_text(GTK_ENTRY(context->login_password));
 
-    int result = handle_login(context->sockfd, username, password);
-    printf("%d\n", result);
-    if (result > 0)
+    User user;
+    int res = handle_login(context->sockfd, username, password, &user);
+    if (res)
     {
         gtk_label_set_text(GTK_LABEL(context->login_message), "Login successful!");
 
@@ -63,7 +64,7 @@ void on_login_button_clicked(GtkWidget *button, gpointer user_data)
         gtk_widget_hide(context->auth_window);
 
         // Chuyển sang giao diện Home
-        init_home_view(context->sockfd, context->auth_window, username);
+        init_home_view(context->sockfd, context->auth_window, user);
     }
     else
     {
@@ -108,5 +109,7 @@ void init_auth_view(int sockfd)
     gtk_main();
 
     g_object_unref(builder);
+
     g_free(context);
+
 }

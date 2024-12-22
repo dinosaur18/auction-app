@@ -7,16 +7,16 @@
 
 typedef struct {
     int item_id;             // ID của vật phẩm
-    char name[MAX_LENGTH];  // Tên vật phẩm
+    char item_name[MAX_LENGTH];  // Tên vật phẩm
     int startingPrice;      // Giá khởi điểm
     int buyNowPrice;        // Giá bán ngay
-    int auctionTime;        // Thời gian đấu giá (giây)
     int room_id;             // ID phòng chứa vật phẩm
+    char status[MAX_LENGTH];       // Trạng thái
 } Item;
 
 // Hàm khai báo
-int getNextItemIdInRoom(int room_id); 
-int createItem(int item_id, const char *name, int startingPrice, int buyNowPrice, int auctionTime, int room_id);
+int getNextItemId(); 
+int createItem(const char *item_name, int startingPrice, int buyNowPrice, int room_id);
 int deleteItem(int item_id);
 void initItemFile();
 int loadItems(int room_id, Item *items);

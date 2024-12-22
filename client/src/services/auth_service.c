@@ -1,21 +1,20 @@
 #include "auth_service.h"
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h> 
+#include <unistd.h>
 #include <sys/socket.h>
 #include "message_type.h"
 #include "user.h"
 
-int handle_login(int sockfd, const char *username, const char *password) {
+int handle_login(int sockfd, const char *username, const char *password, User *user_data)
+{
 
-    char buffer[BUFFER_SIZE];    
+    char buffer[BUFFER_SIZE];
     User user;
     strncpy(user.username, username, sizeof(user.username));
     strncpy(user.password, password, sizeof(user.password));
 
-    printf("Username: %s, Password: %s\n", user.username, user.password);
-    
-    buffer[0] = LOGIN; 
+    buffer[0] = LOGIN;
     memcpy(&buffer[1], &user, sizeof(user));
 
     // Gửi dữ liệu qua socket
@@ -27,24 +26,27 @@ int handle_login(int sockfd, const char *username, const char *password) {
 
     // Đọc phản hồi từ server
     memset(buffer, 0, BUFFER_SIZE);
-    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0) {
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    {
         perror("Failed to receive response");
         return -1;
     }
 
+    memcpy(user_data, &buffer[1], sizeof(User));
     return buffer[0];
 }
 
-int handle_register(int sockfd, const char *username, const char *password) {
+int handle_register(int sockfd, const char *username, const char *password, User *user_data)
+{
 
-    char buffer[BUFFER_SIZE];    
+    char buffer[BUFFER_SIZE];
     User user;
     strncpy(user.username, username, sizeof(user.username));
     strncpy(user.password, password, sizeof(user.password));
 
     printf("Username: %s, Password: %s\n", user.username, user.password);
-    
-    buffer[0] = REGISTER; 
+
+    buffer[0] = REGISTER;
     memcpy(&buffer[1], &user, sizeof(user));
 
     // Gửi dữ liệu qua socket
@@ -56,10 +58,12 @@ int handle_register(int sockfd, const char *username, const char *password) {
 
     // Đọc phản hồi từ server
     memset(buffer, 0, BUFFER_SIZE);
-    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0) {
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    {
         perror("Failed to receive response");
         return -1;
     }
 
-    return buffer[0]; 
+    memcpy(user_data, &buffer[1], sizeof(User));
+    return buffer[0];
 }

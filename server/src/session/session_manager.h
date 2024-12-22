@@ -5,12 +5,14 @@
 
 #define MAX_CLIENTS 1024
 
+
 typedef struct {
     int sockfd;        
     int user_id;       
     char username[64];
 } ClientSession;
 
+extern ClientSession sessions[MAX_CLIENTS];
 // Khởi tạo mảng quản lý phiên
 void init_sessions();
 
