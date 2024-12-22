@@ -218,9 +218,6 @@ void on_add_item_cancel(GtkWidget *button, gpointer user_data)
 
 void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item, int role)
 {
-    AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
-    auctionContext->sockfd = sockfd;
-
     GtkBuilder *builder;
     GtkWidget *window;
     GError *error = NULL;
@@ -247,6 +244,8 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
 
 
 
+
+
     if (GTK_IS_LABEL(label_room_name))
     {
         gtk_label_set_text(GTK_LABEL(label_room_name), room.roomName);
@@ -262,6 +261,20 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
         gtk_label_set_text(GTK_LABEL(label_room_joiner), joiner_count_text);
     }
 
+    auctionContext->room_id = room.room_id;
+
+    auctionContext->item_list = GTK_LIST_BOX(gtk_builder_get_object(builder, "item_list"));
+    auctionContext->item_name = GTK_WIDGET(gtk_builder_get_object(builder, "item_name"));
+    auctionContext->item_starting_price = GTK_WIDGET(gtk_builder_get_object(builder, "item_starting_price"));
+    auctionContext->item_buynow_price = GTK_WIDGET(gtk_builder_get_object(builder, "item_buynow_price"));
+    auctionContext->item_auction_time = GTK_WIDGET(gtk_builder_get_object(builder, "item_auction_time"));
+    auctionContext->item_card = GTK_WIDGET(gtk_builder_get_object(builder, "item_card"));
+    auctionContext->add_item_form = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_form"));
+    auctionContext->add_item_msg = GTK_WIDGET(gtk_builder_get_object(builder, "add_item_msg"));
+
+
+    AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
+    auctionContext->sockfd = sockfd;
     auctionContext->room_id = room.room_id;
 
     auctionContext->item_list = GTK_LIST_BOX(gtk_builder_get_object(builder, "item_list"));
