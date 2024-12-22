@@ -264,32 +264,23 @@ int handle_exit_room(int sockfd, int room_id) {
 
 int handle_start_auction(int sockfd, int room_id)
 {
-    // char buffer[BUFFER_SIZE];
-    // buffer[0] = START_AUCTION;
+    char buffer[BUFFER_SIZE];
+    buffer[0] = START_AUCTION;
 
-    // // Gửi yêu cầu qua socket
-    // if (send(sockfd, buffer, 1, 0) < 0)
-    // {
-    //     perror("Failed to send start auction request");
-    //     return -1;
-    // }
+    // Gửi yêu cầu qua socket
+    if (send(sockfd, buffer, 1, 0) < 0)
+    {
+        perror("Failed to send start auction request");
+        return -1;
+    }
 
-    // // Nhận danh sách phòng từ server
-    // if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
-    // {
-    //     perror("Failed to receive response");
-    //     return -1;
-    // }
+    // Nhận danh sách phòng từ server
+    memset(buffer, 0, BUFFER_SIZE);
+    if (recv(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    {
+        perror("Failed to receive response");
+        return -1;
+    }
 
-    // int room_count = buffer[0]; // buffer[0] chứa số lượng phòng đấu giá
-
-    // if (room_count <= 0)
-    // {
-    //     printf("No rooms found.\n");
-    //     return 0; // Không có phòng nào
-    // }
-
-    // memcpy(rooms, &buffer[1], room_count * sizeof(Room));
-
-    // return room_count; // Trả về số lượng phòng nhận được
+    return buffer[0];
 }

@@ -270,6 +270,36 @@ void handleExitRoom(int client_socket, int room_id)
     }
 }
 
+void handleStartAuction(int client_socket, int room_id)
+{
+    Room room;
+    int result = getRoomById(room_id, &room);
+
+    if (result == 0)
+    {
+        int response = 0; // Error
+        send(client_socket, &response, 1, 0);
+        return;
+    }
+
+    int res = updateRoomById(room_id, 0, "Ongoing");
+    printf("Update Room %d - Ongoing\n", res);
+    if (res <= 0)
+    {
+        int response = 0; // Thất bại
+        send(client_socket, &response, 1, 0);
+        return;
+    }
+    int response = 1;
+
+    // Gửi dữ liệu cho client
+    if (send(client_socket, &response, 1, 0) < 0)
+    {
+        perror("Error sending data");
+        return;
+    }
+}
+
 void handleCreateItem(int client_socket, char buffer[BUFFER_SIZE])
 {
     Item item;

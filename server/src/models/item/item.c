@@ -36,7 +36,7 @@ int createItem(const char *item_name, int startingPrice, int buyNowPrice, int ro
         return 0; // Lỗi khi mở file
     }
 
-    fprintf(file, "%d %s %d %d %d %s\n", item_id, item_name, startingPrice, buyNowPrice, room_id, "NotSold");
+    fprintf(file, "%d %s %d %d %d %s\n", item_id, item_name, startingPrice, buyNowPrice, room_id, "Available");
     
     fclose(file);
     return item_id; // Thành công

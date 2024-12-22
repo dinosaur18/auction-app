@@ -12,13 +12,14 @@
 #define MAX_USERS 100
 #define BUFFER_SIZE 100000
 
-void broadcast_refresh(int client_socket) {
-    char buffer[BUFFER_SIZE];
-    printf("hello\n");
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (sessions[i].sockfd > 0 && sessions[i].sockfd != client_socket) { 
-            buffer[0] = REFRESH;
-            send(sessions[i].sockfd, buffer, 1, 0);
+void broadcast_refresh(int client_socket, char buffer[BUFFER_SIZE])
+{
+    printf("Refresh\n");
+    for (int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if (sessions[i].sockfd > 0 && sessions[i].sockfd != client_socket)
+        {
+            send(sessions[i].sockfd, buffer, BUFFER_SIZE, 0);
         }
     }
 }
@@ -125,7 +126,9 @@ int main()
                         case CREATE_ROOM:
                         {
                             handleCreateRoom(fd, buffer);
-                            broadcast_refresh(fd);
+                            char buffer[BUFFER_SIZE];
+                            buffer[0] = REFRESH;
+                            broadcast_refresh(fd, buffer);
                             break;
                         }
                         case DELETE_ROOM:
@@ -133,18 +136,22 @@ int main()
                             handleDeleteRoom(fd, buffer); // Use correct handler for delete room
                             break;
                         }
-                        case FETCH_ALL_ROOMS: {
+                        case FETCH_ALL_ROOMS:
+                        {
                             handleFetchAllRoom(fd);
                             break;
                         }
-                        case FETCH_OWN_ROOMS: {
+                        case FETCH_OWN_ROOMS:
+                        {
                             handleFetchOwnRoom(fd);
                             break;
                         }
                         case CREATE_ITEM:
                         {
                             handleCreateItem(fd, buffer);
-                            broadcast_refresh(fd);
+                            char buffer[BUFFER_SIZE];
+                            buffer[0] = REFRESH;
+                            broadcast_refresh(fd, buffer);
                             break;
                         }
                         case FETCH_ITEMS:
@@ -156,17 +163,29 @@ int main()
                         case DELETE_ITEM:
                         {
                             handleDeleteItem(fd, buffer);
-                            broadcast_refresh(fd);
+                            char buffer[BUFFER_SIZE];
+                            buffer[0] = REFRESH;
+                            broadcast_refresh(fd, buffer);
                             break;
                         }
-                        case JOIN_ROOM: {
+                        case JOIN_ROOM:
+                        {
                             handleJoinRoom(fd, buffer[1]);
                             // broadcast_refresh(fd);
                             break;
                         }
-                        case EXIT_ROOM: {
+                        case EXIT_ROOM:
+                        {
                             handleExitRoom(fd, buffer[1]);
                             // broadcast_refresh(fd);
+                            break;
+                        }
+                        case START_AUCTION:
+                        {
+                            handleStartAuction(fd, buffer[1]);
+                            char buffer[BUFFER_SIZE];
+                            buffer[0] = START_AUCTION;
+                            broadcast_refresh(fd, buffer);
                             break;
                         }
                         default:

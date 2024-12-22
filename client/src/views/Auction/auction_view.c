@@ -3,6 +3,7 @@
 #include "style_manager.h"
 #include "auction_view.h"
 #include "auction_service.h"
+#include "message_type.h"
 #include "room.h"
 #include "item.h"
 
@@ -234,12 +235,15 @@ void on_btn_start_clicked(GtkWidget *button, gpointer user_data)
 {
     AuctionContext *context = (AuctionContext *)user_data;
 
-    gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
-    if (!is_running)
+    if (handle_start_auction(context->sockfd, context->room_id))
     {
-        is_running = TRUE;
-        remaining_time = 10;
-        g_timeout_add(1000, update_countdown, context); // Gọi lại hàm mỗi giây
+        gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
+        if (!is_running)
+        {
+            is_running = TRUE;
+            remaining_time = 10;
+            g_timeout_add(1000, update_countdown, context); // Gọi lại hàm mỗi giây
+        }
     }
 }
 
@@ -290,15 +294,23 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
             }
 
             // Xử lý thông điệp từ server
-            char message_type = buffer[0]; // Loại thông điệp
-            switch (message_type)
+            switch (buffer[0])
             {
-            case -1:
+            case REFRESH:
                 printf("Server yêu cầu refresh dữ liệu.\n");
                 reload_auction_view(context);
                 break;
+            case START_AUCTION:
+                gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
+                if (!is_running)
+                {
+                    is_running = TRUE;
+                    remaining_time = 10;
+                    g_timeout_add(1000, update_countdown, context); // Gọi lại hàm mỗi giây
+                }
+                break;
             default:
-                printf("Received unknown message type: %d\n", message_type);
+                printf("Received unknown message type: %d\n", buffer[0]);
                 break;
             }
         }

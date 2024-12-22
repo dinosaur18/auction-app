@@ -14,9 +14,10 @@
 typedef struct {
     int room_id;                    // ID của phòng
     char roomName[MAX_LENGTH]; // Tên phòng đấu giá
+    char username[MAX_LENGTH];
     int numUsers;                  // Số người tham gia
     int numItems;                  // Số vật phẩm trong phòng
-    char username[MAX_LENGTH];
+    char status[MAX_LENGTH];
 } Room;
 
 // Khai báo các hàm thao tác với phòng đấu giá
