@@ -104,7 +104,7 @@ GtkWidget *create_room_card(Room room, gpointer user_data)
 void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
 {
     RoomContext *context = (RoomContext *)user_data;
-
+    Item item;
 
     Room room;
     
@@ -117,7 +117,7 @@ void on_join_btn_clicked(GtkWidget *button, gpointer user_data)
     }
 
     gtk_widget_hide(context->home_window);
-    init_auction_view(context->sockfd, context->home_window, room, role);
+    init_auction_view(context->sockfd, context->home_window, room, item, role);
 
 }
 

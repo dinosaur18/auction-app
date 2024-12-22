@@ -15,9 +15,11 @@ typedef struct {
 } Item;
 
 // Hàm khai báo
-int saveItem(Item item);
-int getItemById(int item_id, Item *item);
-int loadItems(int room_id, Item *items);
+int getNextItemIdInRoom(int room_id); 
+int createItem(int item_id, const char *name, int startingPrice, int buyNowPrice, int auctionTime, int room_id);
 int deleteItem(int item_id);
+void initItemFile();
+int loadItems(int room_id, Item *items);
+int getItemById(int item_id, Item *item);
 
 #endif

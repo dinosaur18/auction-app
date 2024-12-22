@@ -9,8 +9,8 @@ void handleDeleteRoom(int sockfd, int room_id);
 void handleFetchAllRoom(int client_socket);
 void handleFetchOwnRoom(int client_socket);
 void handleJoinRoom(int client_socket, int room_id);
-void handleFetchItems(int client_socket, int room_id);
-void handleCreateItem(int sockfd, const char *itemData);
+void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]);
+void handleCreateItem(int sockfd, char buffer[BUFFER_SIZE]);
 void handleDeleteItem(int sockfd, int itemId);
 
 #endif 

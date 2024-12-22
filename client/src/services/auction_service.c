@@ -103,6 +103,9 @@ int handle_delete_item(int sockfd, int itemId)
     buffer[0] = DELETE_ITEM;
     memcpy(&buffer[1], &itemId, sizeof(itemId));
 
+    // debug
+    printf("item ID to delete: %d\n", itemId);
+
     // Gửi dữ liệu qua socket
     if (send(sockfd, buffer, sizeof(itemId) + 1, 0) < 0)
     {
@@ -178,6 +181,7 @@ int handle_fetch_own_rooms(int sockfd, Room *rooms)
     memcpy(rooms, &buffer[1], room_count * sizeof(Room));
     return room_count;
 }
+
 
 // Client gửi yêu cầu lấy danh sách các vật phẩm đang đấu giá
 int handle_fetch_bidding_items(int sockfd, Item *items)
