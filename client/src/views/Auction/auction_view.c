@@ -262,10 +262,6 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, Item item,
         gtk_label_set_text(GTK_LABEL(label_room_joiner), joiner_count_text);
     }
 
-
-
-    AuctionContext *auctionContext = g_malloc(sizeof(AuctionContext));
-    auctionContext->sockfd = sockfd;
     auctionContext->room_id = room.room_id;
 
     auctionContext->item_list = GTK_LIST_BOX(gtk_builder_get_object(builder, "item_list"));
