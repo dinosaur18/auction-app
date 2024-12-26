@@ -12,14 +12,16 @@
 #define MAX_USERS 100
 #define BUFFER_SIZE 100000
 
-void broadcast_refresh(int client_socket, char buffer[BUFFER_SIZE])
+void broadcast_refresh(int client_socket, int MSG_TYPE)
 {
-    printf("Refresh\n");
+    printf("%d\n", MSG_TYPE);
+    char buffer[BUFFER_SIZE];
+    buffer[0] = MSG_TYPE;
     for (int i = 0; i < MAX_CLIENTS; i++)
     {
         if (sessions[i].sockfd > 0 && sessions[i].sockfd != client_socket)
         {
-            send(sessions[i].sockfd, buffer, BUFFER_SIZE, 0);
+            send(sessions[i].sockfd, buffer, 1, 0);
         }
     }
 }
@@ -126,9 +128,7 @@ int main()
                         case CREATE_ROOM:
                         {
                             handleCreateRoom(fd, buffer);
-                            char buffer[BUFFER_SIZE];
-                            buffer[0] = REFRESH;
-                            broadcast_refresh(fd, buffer);
+                            broadcast_refresh(fd, REFRESH);
                             break;
                         }
                         case DELETE_ROOM:
@@ -149,9 +149,7 @@ int main()
                         case CREATE_ITEM:
                         {
                             handleCreateItem(fd, buffer);
-                            char buffer[BUFFER_SIZE];
-                            buffer[0] = REFRESH;
-                            broadcast_refresh(fd, buffer);
+                            broadcast_refresh(fd, REFRESH);
                             break;
                         }
                         case FETCH_ITEMS:
@@ -163,9 +161,7 @@ int main()
                         case DELETE_ITEM:
                         {
                             handleDeleteItem(fd, buffer);
-                            char buffer[BUFFER_SIZE];
-                            buffer[0] = REFRESH;
-                            broadcast_refresh(fd, buffer);
+                            broadcast_refresh(fd, REFRESH);
                             break;
                         }
                         case JOIN_ROOM:
@@ -183,9 +179,7 @@ int main()
                         case START_AUCTION:
                         {
                             handleStartAuction(fd, buffer[1]);
-                            char buffer[BUFFER_SIZE];
-                            buffer[0] = START_AUCTION;
-                            broadcast_refresh(fd, buffer);
+                            broadcast_refresh(fd, START_AUCTION);
                             break;
                         }
                         default:

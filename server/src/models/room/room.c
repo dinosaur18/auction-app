@@ -13,7 +13,7 @@ int getNextRoomId()
     }
 
     Room room;
-    while (fscanf(file, "%d %s %s %d %d\n", &room.room_id, room.roomName, room.username, &room.numUsers, &room.numItems) == 5)
+    while (fscanf(file, "%d %s %s %d %d %s\n", &room.room_id, room.roomName, room.username, &room.numUsers, &room.numItems, room.status) == 6)
     {
         if (room.room_id >= next_room_id)
         {
@@ -28,6 +28,7 @@ int getNextRoomId()
 int createRoom(const char *roomName, const char *username)
 {
     int room_id = getNextRoomId();
+    printf("%d\n",room_id);
     Room room;
     room.room_id = room_id;
     strncpy(room.roomName, roomName, sizeof(room.roomName));
@@ -107,7 +108,7 @@ int checkRoomExists(Room room)
     }
 
     Room existedRoom;
-    while (fscanf(file, "%d %s %s %d %d\n", &existedRoom.room_id, existedRoom.roomName, existedRoom.username, &existedRoom.numUsers, &existedRoom.numItems) == 5)
+    while (fscanf(file, "%d %s %s %d %d %s\n", &existedRoom.room_id, existedRoom.roomName, existedRoom.username, &existedRoom.numUsers, &existedRoom.numItems, existedRoom.status) == 6)
     {
         if (strcmp(existedRoom.username, room.username) == 0 && strcmp(existedRoom.roomName, room.roomName) == 0)
         {

@@ -69,7 +69,7 @@
               </packing>
             </child>
             <child>
-              <!-- n-columns=2 n-rows=4 -->
+              <!-- n-columns=2 n-rows=3 -->
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
@@ -83,7 +83,6 @@
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Name : </property>
                     <style>
-                      <class name="text_color_white"/>
                       <class name="text_bold"/>
                     </style>
                   </object>
@@ -109,7 +108,6 @@
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Starting Price : </property>
                     <style>
-                      <class name="text_color_white"/>
                       <class name="text_bold"/>
                     </style>
                   </object>
@@ -125,29 +123,12 @@
                     <property name="halign">start</property>
                     <property name="label" translatable="yes">Buy Now Price: </property>
                     <style>
-                      <class name="text_color_white"/>
                       <class name="text_bold"/>
                     </style>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
                     <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Auction Time : </property>
-                    <style>
-                      <class name="text_color_white"/>
-                      <class name="text_bold"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="left-attach">0</property>
-                    <property name="top-attach">3</property>
                   </packing>
                 </child>
                 <child>
@@ -168,16 +149,6 @@
                   <packing>
                     <property name="left-attach">1</property>
                     <property name="top-attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="item_auction_time">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                  </object>
-                  <packing>
-                    <property name="left-attach">1</property>
-                    <property name="top-attach">3</property>
                   </packing>
                 </child>
               </object>
@@ -579,7 +550,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="current_user">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">User</property>
@@ -591,7 +562,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="highest_price">
                                     <property name="visible">True</property>
                                     <property name="can-focus">False</property>
                                     <property name="label" translatable="yes">price</property>
@@ -646,7 +617,7 @@
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkLabel" id="auction_item_name">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Name item</property>
@@ -668,16 +639,28 @@
                           <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
-                            <property name="orientation">vertical</property>
+                            <property name="halign">center</property>
                             <child>
-                              <object class="GtkProgressBar" id="countdown_progress">
+                              <object class="GtkLabel">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">00 : </property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="auction_time">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
@@ -806,6 +789,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="clicked" handler="on_bid_1" swapped="no"/>
                                 <style>
                                   <class name="custom_button"/>
                                 </style>
@@ -822,6 +806,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="clicked" handler="on_bid_2" swapped="no"/>
                                 <style>
                                   <class name="custom_button"/>
                                 </style>
@@ -838,6 +823,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="clicked" handler="on_bid_3" swapped="no"/>
                                 <style>
                                   <class name="custom_button"/>
                                 </style>
@@ -854,6 +840,7 @@
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="receives-default">True</property>
+                                <signal name="clicked" handler="on_bid_4" swapped="no"/>
                                 <style>
                                   <class name="custom_button"/>
                                 </style>

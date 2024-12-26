@@ -7,21 +7,34 @@
 #include "room.h"
 #include "item.h"
 
-int remaining_time = 10;     // Đếm ngược 10 giây trước khi bắt đầu phiên đấu giá
+int remaining_time = 10;
 gboolean is_running = FALSE; // Trạng thái đồng hồ
+gboolean auction_running = FALSE;
 
 typedef struct
 {
     int sockfd;
     int role;
+    int room_id;
+    int item_id;
     GtkWidget *home_window;
     GtkWidget *label_room_joiner;
     GtkWidget *auction_window;
     GtkStack *auction_stack;
-    GtkStack *label_waiting;
-    GtkStack *label_countdown;
-    int room_id;
-    int item_id;
+    GtkWidget *label_waiting;
+    GtkWidget *label_countdown;
+
+    double current_item_startPrice;
+    GtkWidget *current_user;
+    GtkWidget *highest_price;
+    GtkWidget *auction_item_name;
+    GtkWidget *auction_time;
+    GtkWidget *start_price;
+    GtkWidget *current_price;
+    GtkWidget *btn_bid1;
+    GtkWidget *btn_bid2;
+    GtkWidget *btn_bid3;
+    GtkWidget *btn_bid4;
 
     GtkWidget *add_item_form;
     GtkWidget *item_name;
@@ -208,10 +221,9 @@ void on_add_item_cancel(GtkWidget *button, gpointer user_data)
     gtk_widget_hide(form);
 }
 
-////////////////// ////////////////// //////////////////
+////////////////// AUCTION //////////////////
 
-// Hàm cập nhật thời gian trên nhãn
-gboolean update_countdown(gpointer user_data)
+gboolean waiting_countdown(gpointer user_data)
 {
     AuctionContext *context = (AuctionContext *)user_data;
     if (remaining_time <= 0)
@@ -231,6 +243,26 @@ gboolean update_countdown(gpointer user_data)
     return TRUE; // Tiếp tục gọi lại hàm sau 1 giây
 }
 
+gboolean auction_countdown(gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    if (remaining_time <= 0)
+    {
+        gtk_stack_set_visible_child_name(context->auction_stack, "waiting");
+        auction_running = FALSE; // Kết thúc 1 lượt đấu giá
+        return FALSE;            // Dừng việc gọi lại hàm này
+    }
+
+    // Cập nhật thời gian
+    char buffer[16];
+    snprintf(buffer, sizeof(buffer), "%d", remaining_time);
+    gtk_label_set_text(GTK_LABEL(context->auction_time), buffer);
+
+    // Giảm thời gian
+    remaining_time--;
+    return TRUE; // Tiếp tục gọi lại hàm sau 1 giây
+}
+
 void on_btn_start_clicked(GtkWidget *button, gpointer user_data)
 {
     AuctionContext *context = (AuctionContext *)user_data;
@@ -242,10 +274,145 @@ void on_btn_start_clicked(GtkWidget *button, gpointer user_data)
         {
             is_running = TRUE;
             remaining_time = 10;
-            g_timeout_add(1000, update_countdown, context); // Gọi lại hàm mỗi giây
+            g_timeout_add(1000, waiting_countdown, context); // Gọi lại hàm mỗi giây
         }
     }
 }
+
+// Hàm tính toán bước giá
+void calculate_bid_steps(double item_price, double *step1, double *step2, double *step3, double *step4)
+{
+    double step = item_price * 0.02; // 2% của giá vật phẩm
+    *step1 = step;
+    *step2 = step * 2;
+    *step3 = step * 3;
+    *step4 = step * 4;
+}
+
+void update_bid_steps(double item_price, AuctionContext *context)
+{
+    double step1, step2, step3, step4;
+    calculate_bid_steps(item_price, &step1, &step2, &step3, &step4);
+
+    char label1[50], label2[50], label3[50], label4[50];
+    sprintf(label1, "%.2f", step1);
+    sprintf(label2, "%.2f", step2);
+    sprintf(label3, "%.2f", step3);
+    sprintf(label4, "%.2f", step4);
+
+    gtk_button_set_label(GTK_BUTTON(context->btn_bid1), label1);
+    gtk_button_set_label(GTK_BUTTON(context->btn_bid2), label2);
+    gtk_button_set_label(GTK_BUTTON(context->btn_bid3), label3);
+    gtk_button_set_label(GTK_BUTTON(context->btn_bid4), label4);
+}
+
+// Xử lý sự kiện click các bước giá
+void on_bid_1(GtkWidget *button, gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    printf("You selected bid: %.2f\n", context->current_item_startPrice * 0.02);
+}
+
+void on_bid_2(GtkWidget *button, gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    printf("You selected bid: %.2f\n", context->current_item_startPrice * 0.02 * 2);
+}
+
+void on_bid_3(GtkWidget *button, gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    printf("You selected bid: %.2f\n", context->current_item_startPrice * 0.02 * 3);
+}
+
+void on_bid_4(GtkWidget *button, gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    printf("You selected bid: %.2f\n", context->current_item_startPrice * 0.02 * 4);
+}
+
+// Hàm xử lý tín hiệu bắt đầu đấu giá
+void start_auction_process(gpointer user_data)
+{
+    AuctionContext *context = (AuctionContext *)user_data;
+    Item items[MAX_ITEM_IN_ROOM];
+    int item_count = handle_fetch_items(context->sockfd, context->room_id, items);
+    printf("Check %d\n", context->room_id);
+
+    if (item_count > 0)
+    {
+        gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
+        if (!is_running)
+        {
+            is_running = TRUE;
+            remaining_time = 10;
+            g_timeout_add(1000, waiting_countdown, context); // Gọi lại hàm mỗi giây
+        }
+    }
+    else
+    {
+        printf("No items available for auction.\n");
+        gtk_label_set_text(GTK_LABEL(context->label_waiting), "No items available for auction.");
+        return;
+    }
+
+    for (int i = 0; i < item_count; i++)
+    {
+        Item *current_item = &items[i];
+        context->current_item_startPrice = current_item->startingPrice;
+        remaining_time = 30; // Mỗi vật phẩm đấu giá bắt đầu với 30 giây
+
+        update_bid_steps(current_item->startingPrice, context);
+
+        printf("Starting auction for item: %s\n", current_item->item_name);
+        gtk_label_set_text(GTK_LABEL(context->auction_item_name), current_item->item_name);
+        char label[32];
+        snprintf(label, sizeof(label), "%d", current_item->startingPrice);
+        gtk_label_set_text(GTK_LABEL(context->start_price), label);
+
+        auction_running = TRUE;
+
+        // Đếm ngược cho mỗi vật phẩm
+        while (auction_running)
+        {
+            g_timeout_add(1000, (GSourceFunc)auction_countdown, context);
+
+            // Giả lập xử lý sự kiện ra giá từ client
+            gboolean bid_received = FALSE; // Hàm này nên kết nối với socket để nhận sự kiện thực tế
+            if (bid_received)
+            {
+                remaining_time = 30; // Reset thời gian khi có người ra giá
+            }
+
+            if (remaining_time <= 0)
+            {
+                auction_running = FALSE;
+                char label[100];
+                sprintf(label, "Auction ended for item: %s - user:", current_item->item_name);
+                gtk_label_set_text(GTK_LABEL(context->label_waiting), label);
+                // Xử lý lưu kết quả đấu giá vào server
+                // Ví dụ: handle_save_auction_result(context->sockfd, current_item->item_id, winner);
+            }
+
+            g_usleep(1000 * 1000); // Nghỉ 1 giây (đồng bộ với g_timeout_add)
+        }
+
+        // Nghỉ 10 giây trước khi đấu giá vật phẩm tiếp theo
+        printf("Waiting 10 seconds before next item.\n");
+        remaining_time = 10;
+        gtk_label_set_text(GTK_LABEL(context->label_waiting), "Preparing next item...");
+        while (remaining_time > 0)
+        {
+            g_timeout_add(1000, (GSourceFunc)waiting_countdown, context);
+            g_usleep(1000 * 1000); // Nghỉ 1 giây
+        }
+    }
+
+    printf("All items have been auctioned.\n");
+    gtk_label_set_text(GTK_LABEL(context->label_waiting), "Auction session completed.");
+}
+
+////////////////// ////////////////// //////////////////
 
 void reload_auction_view(gpointer user_data)
 {
@@ -294,25 +461,19 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
             }
 
             // Xử lý thông điệp từ server
-            switch (buffer[0])
+            char message_type = buffer[0];
+            printf("test%d\n", buffer[0]);
+            if (message_type == REFRESH)
             {
-            case REFRESH:
                 printf("Server yêu cầu refresh dữ liệu.\n");
                 reload_auction_view(context);
-                break;
-            case START_AUCTION:
-                gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
-                if (!is_running)
-                {
-                    is_running = TRUE;
-                    remaining_time = 10;
-                    g_timeout_add(1000, update_countdown, context); // Gọi lại hàm mỗi giây
-                }
-                break;
-            default:
-                printf("Received unknown message type: %d\n", buffer[0]);
-                break;
             }
+            else if (message_type == START_AUCTION)
+            {
+                start_auction_process(context);
+            }
+            else
+                printf("Received unknown message type - auction: %d\n", message_type);
         }
     }
     return TRUE; // Tiếp tục theo dõi socket
@@ -346,10 +507,20 @@ void init_auction_view(int sockfd, GtkWidget *home_window, Room room, int role)
     GtkWidget *label_room_owner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_owner"));
     GtkWidget *add_button = GTK_WIDGET(gtk_builder_get_object(builder, "add_button"));
     GtkWidget *start_button = GTK_WIDGET(gtk_builder_get_object(builder, "start_button"));
+    auctionContext->current_user = GTK_WIDGET(gtk_builder_get_object(builder, "current_user"));
+    auctionContext->highest_price = GTK_WIDGET(gtk_builder_get_object(builder, "highest_price"));
+    auctionContext->auction_item_name = GTK_WIDGET(gtk_builder_get_object(builder, "auction_item_name"));
+    auctionContext->auction_time = GTK_WIDGET(gtk_builder_get_object(builder, "auction_time"));
+    auctionContext->start_price = GTK_WIDGET(gtk_builder_get_object(builder, "start_price"));
+    auctionContext->current_price = GTK_WIDGET(gtk_builder_get_object(builder, "current_price"));
+    auctionContext->btn_bid1 = GTK_WIDGET(gtk_builder_get_object(builder, "btn_bid1"));
+    auctionContext->btn_bid2 = GTK_WIDGET(gtk_builder_get_object(builder, "btn_bid2"));
+    auctionContext->btn_bid3 = GTK_WIDGET(gtk_builder_get_object(builder, "btn_bid3"));
+    auctionContext->btn_bid4 = GTK_WIDGET(gtk_builder_get_object(builder, "btn_bid4"));
     auctionContext->label_room_joiner = GTK_WIDGET(gtk_builder_get_object(builder, "label_room_joiner"));
     auctionContext->auction_stack = GTK_STACK(gtk_builder_get_object(builder, "auction_stack"));
-    auctionContext->label_waiting = GTK_STACK(gtk_builder_get_object(builder, "label_waiting"));
-    auctionContext->label_countdown = GTK_STACK(gtk_builder_get_object(builder, "label_countdown"));
+    auctionContext->label_waiting = GTK_WIDGET(gtk_builder_get_object(builder, "label_waiting"));
+    auctionContext->label_countdown = GTK_WIDGET(gtk_builder_get_object(builder, "label_countdown"));
 
     if (GTK_IS_LABEL(label_room_name))
     {
