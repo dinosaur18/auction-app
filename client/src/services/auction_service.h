@@ -17,5 +17,6 @@ int handle_fetch_items(int sockfd, int room_id, Item *items);
 int handle_join_room(int sockfd, int room_id, Room *room);
 int handle_exit_room(int sockfd, int room_id);
 int handle_start_auction(int sockfd, int room_id);
+int handle_buy_now(int sockfd, int room_id, int item_id);
 
 #endif 

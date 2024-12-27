@@ -174,3 +174,58 @@ int getItemById(int item_id, Item *item)
     fclose(file);
     return 0; // Phòng không tồn tại
 }
+
+int _replaceLineInFile(const char *fileName, int lineToReplace, const char *newLineContent) {
+    FILE *file = fopen(fileName, "r+");
+    if (file == NULL)
+    {
+        perror("Error when opening file");
+        return -1;
+    }
+
+    char temp[1024];
+    int currentLine = 1;
+    
+    while (fgets(temp, 1024, file) != NULL)
+    {
+        if (currentLine == lineToReplace)
+        {
+            fseek(file, -strlen(temp), SEEK_CUR);
+            fputs(newLineContent, file);
+            
+            break; 
+        }
+        currentLine++;
+    }
+
+    fclose(file);
+    return 0;  // Success
+}
+
+int setItemStatus(int itemId, const char *status)
+{
+    Item item;
+    int line = 0;
+
+    FILE *file = fopen("data/items.txt", "r");
+    if (file == NULL)
+    {
+        perror("Failed to open items.txt");
+        return 0; // Lỗi khi mở file
+    }
+    
+    while (fscanf(file, "%d %s %d %d %d %s", &item.item_id, item.item_name, &item.startingPrice, &item.buyNowPrice, &item.room_id, item.status) == 6)
+    {
+        line++;
+        if (item.item_id == itemId && strcmp(item.status, "Available") == 0)
+        {
+            char newInfo[1024];
+            sprintf(newInfo, "%d %s %d %d %d %s\n", item.item_id, item.item_name, item.startingPrice, item.buyNowPrice, item.room_id, status);
+            _replaceLineInFile("data/items.txt", line, newInfo);
+            
+            return 1;
+        }
+        fgetc(file);
+    }
+    return -1;
+}

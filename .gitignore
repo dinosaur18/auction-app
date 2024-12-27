@@ -1,3 +1,5 @@
+test*
+
 # Bỏ qua file object (.o)
 *.o
 

@@ -385,3 +385,18 @@ void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE])
         perror("Failed to send response to client");
     }
 }
+
+void handleBuyNow(int sockfd, char buffer[BUFFER_SIZE])
+{
+    // buffer: <flag: 1><room id: 1><item_id: 4>
+    int item_id;
+    // int room_id = buffer[1];
+
+    memcpy(&item_id, buffer + 2, sizeof(int));
+
+    if (setItemStatus(item_id, "Sold_Out_") < 0)
+    {
+        // TODO: Idk wtf to do here but there should be a comment 
+        printf("[BUYNOW] Failed to sell item %d\n", item_id);
+    }
+}

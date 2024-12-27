@@ -284,3 +284,22 @@ int handle_start_auction(int sockfd, int room_id)
 
     return buffer[0];
 }
+
+int handle_buy_now(int sockfd, int room_id, int item_id) 
+{
+    char buffer[BUFFER_SIZE];
+    buffer[0] = BUY_NOW;
+    buffer[1] = room_id;
+    memcpy(buffer + 2, &item_id, sizeof(int));
+
+    // buffer: <flag: 1><room id: 1><item_id: 4>
+
+    if (send(sockfd, buffer, BUFFER_SIZE, 0) < 0)
+    {
+        perror("Failed to perform `Buy now`");
+        return -1;
+    }
+    
+    // TODO: implement `bought`
+    return 0;
+}

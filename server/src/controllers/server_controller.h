@@ -14,5 +14,6 @@ void handleStartAuction(int client_socket, int room_id);
 void handleFetchItems(int client_socket, char buffer[BUFFER_SIZE]);
 void handleCreateItem(int client_socket, char buffer[BUFFER_SIZE]);
 void handleDeleteItem(int sockfd, char buffer[BUFFER_SIZE]);
+void handleBuyNow(int sockfd, char buffer[BUFFER_SIZE]);
 
 #endif 

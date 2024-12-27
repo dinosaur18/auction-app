@@ -1,1 +1,4 @@
 1 Item1 123 123 1 Available
+2 Item2 234 234 2 Available
+3 Item2 12000 20000 4 Sold_Out_
+4 Item2 10000 12000 5 Sold_Out_

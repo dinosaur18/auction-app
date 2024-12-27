@@ -66,6 +66,20 @@ void on_auction_window_destroy(GtkWidget *widget, gpointer user_data)
     }
 }
 
+void on_buy_button_clicked(GtkWidget *widget, gpointer user_data)
+{
+    printf("Buy button clicked\n");
+    ItemContext *context = (ItemContext *)user_data;
+
+    printf("Item id: %d\n", context->item.item_id);
+
+    if (handle_buy_now(context->sockfd, context->room_id, context->item.item_id) < 0)
+    {
+        printf("[BUYNOW] Cannot buy\n");
+        return;
+    }
+}
+
 void clear_item_children(GtkListBox *listbox)
 {
     GList *children = gtk_container_get_children(GTK_CONTAINER(listbox));
@@ -113,6 +127,8 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
     GtkWidget *status = GTK_WIDGET(gtk_builder_get_object(builder, "status"));
     GtkWidget *buy_button = GTK_WIDGET(gtk_builder_get_object(builder, "buy_button"));
     GtkWidget *delete_button = GTK_WIDGET(gtk_builder_get_object(builder, "delete_button"));
+
+    g_signal_connect(buy_button, "clicked", G_CALLBACK(on_buy_button_clicked), itemContext);
 
     if (GTK_IS_LABEL(item_name))
     {

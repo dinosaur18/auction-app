@@ -21,5 +21,6 @@ int deleteItem(int item_id);
 void initItemFile();
 int loadItems(int room_id, Item *items);
 int getItemById(int item_id, Item *item);
+int setItemStatus(int itemId, const char *status);
 
 #endif

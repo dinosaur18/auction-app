@@ -182,6 +182,12 @@ int main()
                             broadcast_refresh(fd, START_AUCTION);
                             break;
                         }
+                        case BUY_NOW:
+                        {
+                            handleBuyNow(fd, buffer);
+                            broadcast_refresh(fd, REFRESH);
+                            break;
+                        }
                         default:
                             printf("Unknown message type: %d\n", buffer[0]);
                         }
