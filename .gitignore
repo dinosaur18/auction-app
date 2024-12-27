@@ -1,4 +1,5 @@
 test*
+.vscode
 
 # Bỏ qua file object (.o)
 *.o

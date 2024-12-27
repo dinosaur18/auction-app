@@ -1,4 +1,8 @@
-1 Item1 123 123 1 Available
+1 Item1 123 123 1 Sold_Out_
 2 Item2 234 234 2 Available
-3 Item2 12000 20000 4 Sold_Out_
-4 Item2 10000 12000 5 Sold_Out_
+5 weed 12 13 6 Sold_Out_
+6 nuclear_bomb 12 13 6 Sold_Out_
+7 cocain 13 15 6 Available
+8 kfc 123 143 5 Available
+9 kkk 12 13 4 Available
+10 jjj 12 13 7 Available

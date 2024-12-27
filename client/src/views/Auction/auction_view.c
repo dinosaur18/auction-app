@@ -53,6 +53,7 @@ typedef struct
     int sockfd;
     int room_id;
     Item item;
+    GtkLabel *status_label;
     AuctionContext *auctionContext;
 } ItemContext;
 
@@ -78,6 +79,8 @@ void on_buy_button_clicked(GtkWidget *widget, gpointer user_data)
         printf("[BUYNOW] Cannot buy\n");
         return;
     }
+
+    gtk_label_set_text(context->status_label, "Sold");
 }
 
 void clear_item_children(GtkListBox *listbox)
@@ -128,6 +131,8 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
     GtkWidget *buy_button = GTK_WIDGET(gtk_builder_get_object(builder, "buy_button"));
     GtkWidget *delete_button = GTK_WIDGET(gtk_builder_get_object(builder, "delete_button"));
 
+    itemContext->status_label = (GtkLabel *)status;
+
     g_signal_connect(buy_button, "clicked", G_CALLBACK(on_buy_button_clicked), itemContext);
 
     if (GTK_IS_LABEL(item_name))
@@ -137,7 +142,17 @@ GtkWidget *add_item_card(Item item, gpointer user_data)
 
     if (GTK_IS_LABEL(status))
     {
-        gtk_label_set_text(GTK_LABEL(status), item.status);
+        char _item_status[64];
+        if (strcmp(item.status, "Sold_Out_") == 0)
+        {
+            sprintf(_item_status, "Sold");
+        }
+        else
+        {
+            sprintf(_item_status, "%s", item.status);
+        }
+
+        gtk_label_set_text(GTK_LABEL(status), _item_status);
     }
 
     gtk_widget_show_all(card);
@@ -350,14 +365,18 @@ void on_bid_4(GtkWidget *button, gpointer user_data)
 // Hàm xử lý tín hiệu bắt đầu đấu giá
 void start_auction_process(gpointer user_data)
 {
+    printf("START_AUCTION received\n");
+
     AuctionContext *context = (AuctionContext *)user_data;
     Item items[MAX_ITEM_IN_ROOM];
     int item_count = handle_fetch_items(context->sockfd, context->room_id, items);
+
     printf("Check %d\n", context->room_id);
+    printf("Item count: %d\n", item_count);
 
     if (item_count > 0)
     {
-        gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diên ra sau");
+        gtk_label_set_text(GTK_LABEL(context->label_waiting), "Phiên đấu giá sẽ diễn ra sau");
         if (!is_running)
         {
             is_running = TRUE;
@@ -392,6 +411,7 @@ void start_auction_process(gpointer user_data)
         while (auction_running)
         {
             g_timeout_add(1000, (GSourceFunc)auction_countdown, context);
+            // bug: the auction_countdown function is never called so the remaining_time value is consistently 30
 
             // Giả lập xử lý sự kiện ra giá từ client
             gboolean bid_received = FALSE; // Hàm này nên kết nối với socket để nhận sự kiện thực tế
@@ -487,6 +507,8 @@ gboolean on_socket_event_auction(GIOChannel *source, GIOCondition condition, gpo
             else if (message_type == START_AUCTION)
             {
                 start_auction_process(context);
+                // pthread_t thread;
+                // pthread_create(&thread, NULL, (void*)start_auction_process, (void*)context);
             }
             else
                 printf("Received unknown message type - auction: %d\n", message_type);

@@ -37,6 +37,8 @@ int createItem(const char *item_name, int startingPrice, int buyNowPrice, int ro
     }
 
     fprintf(file, "%d %s %d %d %d %s\n", item_id, item_name, startingPrice, buyNowPrice, room_id, "Available");
+
+    printf("Item %s added\n", item_name);
     
     fclose(file);
     return item_id; // Thành công
